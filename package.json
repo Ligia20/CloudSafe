@@ -1,0 +1,32 @@
+{
+  "name": "cloudsafe",
+  "version": "1.0.0",
+  "description": "*Capstone Project that imitates a SIEM tool with new features.",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "prisma": "^7.9.1",
+    "tsx": "^4.23.5",
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ligia20/CloudSafe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Ligia20/CloudSafe/issues"
+  },
+  "homepage": "https://github.com/Ligia20/CloudSafe#readme",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1"
+  }
+}
