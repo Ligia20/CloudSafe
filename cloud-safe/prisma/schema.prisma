@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Recent_Alert_ {
+  alert_id    String    @id @db.Uuid
+  severity    String?
+  alert_name_ String?   @map("alert_name ")
+  asset       String?
+  alert_time  DateTime? @db.Timestamp(6)
+  status      String?
+
+  @@map("Recent-Alert ")
+}
+
+model Recent_Logs {
+  log_id    String    @id @db.Uuid
+  asset     String?
+  source_ip String?
+  event     String?
+  severity  String?
+  action    String?
+  log_time  DateTime? @db.Timestamp(6)
+
+  @@map("Recent-Logs")
+}
