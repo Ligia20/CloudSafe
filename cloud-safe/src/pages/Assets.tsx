@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import {
+  
   IonBadge,
   IonButton,
   IonCard,
@@ -49,11 +50,13 @@ function Assets() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [editingAssetId, setEditingAssetId] = useState<number |null>(null);
 
   const addAsset = () => {
     if (!form.name.trim() || !form.type.trim() || !form.ipAddress.trim()) {
       return;
-    }
+    } 
+    
 
     const newAsset: Asset = {
       id: Date.now(),
@@ -64,7 +67,18 @@ function Assets() {
     setForm(emptyForm);
     setIsModalOpen(false);
   };
+  const startEdit = (asset: Asset) => {
+    setEditingAssetId(asset.id);
+  setForm({
+       name: asset.name,
+   type: asset.type,
+      ipAddress: asset.ipAddress,
+  severity: asset.severity,
+ status: asset.status,
+  });
 
+  setIsModalOpen(true);
+};
   const deleteAsset = (assetId: number) => {
     setAssets((currentAssets) =>
       currentAssets.filter((asset) => asset.id !== assetId),
@@ -147,8 +161,11 @@ function Assets() {
                         </IonBadge>
                       </p>
 
-                      <IonButton size="small" disabled>
-                        Edit
+                      <IonButton
+                  size="small"
+           onClick={() => startEdit(asset)}
+                   >
+                    Edit
                       </IonButton>
 
                       <IonButton
