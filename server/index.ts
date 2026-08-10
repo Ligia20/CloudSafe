@@ -23,6 +23,29 @@ app.get("/dashboard", async (req, res) => {
     ],
   });
 
+  const firstPage = await prisma.Recent_Logs.findMany({
+    take: 10,
+    orderBy: [
+        { log_id: "asc" },
+        { asset: "asc" },
+        { source_ip: "asc" },
+        { event: "desc" },
+    ]
+  });
+ 
+  const lastPage = firstPage[firstPage.length - 1];
+
+  const nextPage = lastPage ? await prisma.Recent_Logs.findMany({
+        take: 10,
+        skip: 1,
+        cursor: { log_id: lastPage.log_id },
+        orderBy:{
+            log_id: "asc",
+            asset: "asc",
+            source_ip: "asc",
+        }
+  }) : [];
+
   const Recent_Logs = await prisma.Recent_Logs.findMany({
     orderBy: [
       { log_id: "asc" },
@@ -36,7 +59,7 @@ app.get("/dashboard", async (req, res) => {
     ],
   });
 
-  res.json({ Recent_Alert_, Recent_Logs });
+  res.json({ Recent_Alert_, Recent_Logs, firstPage, lastPage });
 });
 
 app.get("/logs", async (req, res) => {
