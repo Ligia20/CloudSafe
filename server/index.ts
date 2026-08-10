@@ -45,6 +45,11 @@ app.get("/dashboard", async (req, res) =>{
     res.json({server, dashboard, Recent_Alert_, Recent_Logs})   
 })
 
+app.get("/logs", async (req,res) =>{
+    const logs = await prisma.Recent_Logs.findMany();
+    res.json({logs});
+})
+
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
 });
