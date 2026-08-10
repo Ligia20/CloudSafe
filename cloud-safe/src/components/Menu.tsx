@@ -9,7 +9,7 @@ import {
   IonMenuToggle,
   IonNote,
 } from '@ionic/react';
-
+import {cloud} from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
 import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
@@ -69,7 +69,9 @@ const Menu: React.FC = () => {
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
+          <IonListHeader>Cloud Safe
+            <IonIcon slot="end" icon={cloud}></IonIcon>
+          </IonListHeader>
           <IonNote>hi@ionicframework.com</IonNote>
           {appPages.map((appPage, index) => {
             return (

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { 
   IonButton, 
   IonButtons, 
@@ -27,6 +28,22 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
   ResponsiveContainer, BarChart, Bar, Cell 
 } from 'recharts';
+
+const COLUMN_CONFIG = {
+  stats: {
+    assets: "Monitored Assets",
+    activeAlerts: "Active Alerts",
+    totalLogs: "Total Logs",
+    criticalAlerts: "Critical Alerts"
+  },
+    logsTable: {
+      incident: "Severity Incident",
+      target: "Asset",
+      source: "Source IP",
+      time: "Time",
+      action: "Action Taken"
+  }
+};
 
 // --- HARDCODED DATA STRUCTURES ---
 const MOCK_STATS = [
