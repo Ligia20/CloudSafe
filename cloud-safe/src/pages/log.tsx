@@ -7,8 +7,10 @@ const Log: React.FC = () => {
 const [searchText, setSearchText] = useState("");
 const [selectedSeverity, setSelectedSeverity] = useState('all');
 const [selectedAsset, setSelectedAsset] = useState('all');
+const [selectedSort, setSelectedSort] = useState('newest');
 const [isOpen, setIsOpen] = useState(false);
-const [logs, setLogs] = useState([]);
+const [selectedTime, setSelectedTime] = useState('all');
+// const [logs, setLogs] = useState([]);
 
     useEffect(() => {
             const getLogs = async () => {
@@ -62,15 +64,33 @@ const [logs, setLogs] = useState([]);
 
 
 
+
         <IonButton onClick={() => setIsOpen(true)}>Filter</IonButton>
         <IonPopover
           isOpen={isOpen}
           onDidDismiss={() => setIsOpen(false)}
         >
-          <IonContent>
-            <p>Filter options go here</p>
-          </IonContent>
-        </IonPopover>
+
+              <IonSelect placeholder='sort by'
+                value={selectedSort}
+                onIonChange={e => setSelectedSort(e.detail.value)}>
+                  <IonSelectOption value='newest'>Newest</IonSelectOption>
+                  <IonSelectOption value='oldest'>Oldest</IonSelectOption>
+              </IonSelect>
+
+              <IonSelect placeholder='time range'
+                value={selectedTime}
+                onIonChange={e => setSelectedTime(e.detail.value)}>
+                  <IonSelectOption value='all'>All time </IonSelectOption>
+                  <IonSelectOption value='24hrs'>Last 24 hours</IonSelectOption>
+                  <IonSelectOption value='7days'>Last 7 days</IonSelectOption>
+                  <IonSelectOption value='30days'>Last 30 days</IonSelectOption>
+              </IonSelect>
+
+            {/*MAYBE ADD ACTION FILTER ACCESSED,DENIED, BLOCKED, FLAGGED*/}
+
+         
+            </IonPopover>
 
 
         </IonSearchbar>
