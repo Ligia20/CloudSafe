@@ -1,0 +1,50 @@
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import express from "express";
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
+const PORT = 3000;
+const app = express();
+app.use(express.json());
+
+const getServer = async () =>{
+    const server = await prisma.server.findFirst();
+}
+const getDashboard = async ()=>{
+    const dashboard = await prisma.dashboard.findFirst();
+}
+app.get("/dashboard", async (req, res) =>{
+    const server = await getServer();
+    const dashboard = await getDashboard();
+    const Recent_Alert_ = await prisma.Recent_Alert_.findMany({
+        orderBy: [
+            { alert_id: "asc" },
+            { severity: "asc" },
+            { alert_name_String: "asc" },
+            { asset: "asc" },
+            { alert_time: "desc" },
+            { status: "asc" },
+            { createdAt: "desc" },
+            { map: "asc" },
+                ],
+            });
+    const Recent_Logs = await prisma.Recent_Logs.findMany({
+        orderBy: [
+            { log_id: "asc" },
+            { asset: "asc" },
+            { source_ip: "asc" },
+            { event: "desc" },
+            { severity: "asc" },
+            { action: "asc" },
+            { log_time: "desc" },
+            { map: "asc" },
+        ]
+    });
+    res.json({server, dashboard, Recent_Alert_, Recent_Logs})   
+})
+
+app.listen(PORT, () => {
+  console.log(`Listening on http://localhost:${PORT}`);
+});
