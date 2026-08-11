@@ -14,7 +14,7 @@ datasource db {
 
 model Recent_Alert_ {
   alert_id    String    @id @db.Uuid
-  severity    String?
+  severity    Severity
   alert_name_ String?   @map("alert_name ")
   asset       String?
   alert_time  DateTime? @db.Timestamp(6)
@@ -28,7 +28,7 @@ model Recent_Logs {
   asset     String?
   source_ip String?
   event     String?
-  severity  String?
+  severity  Severity
   action    String?
   log_time  DateTime? @db.Timestamp(6)
 
@@ -46,3 +46,9 @@ model Asset {
   lastSeen        DateTime?
   createdAt       DateTime @default(now())
 } 
+enum Severity{
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

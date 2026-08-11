@@ -1,11 +1,8 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "./lib/prisma";
 import express from "express";
 import cors from "cors";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
 const PORT = 3000;
 const app = express();
 app.use(cors());
@@ -13,32 +10,25 @@ app.use(express.json());
 app.use(express.json());
 
 app.get("/dashboard", async (req, res) => {
-  const Recent_Alert_ = await prisma.Recent_Alert_.findMany({
+  const Recent_Alert_ = await prisma.recent_Alert_.findMany({
     orderBy: [
-      { alert_id: "asc" },
-      { severity: "asc" },
-      { alert_name_String: "asc" },
-      { asset: "asc" },
-      { alert_time: "desc" },
-      { status: "asc" },
-      { createdAt: "desc" },
-      { map: "asc" },
+      { severity: "desc" },
     ],
   });
 
-  const firstPage = await prisma.Recent_Logs.findMany({
+  const firstPage = await prisma.recent_Logs.findMany({
     take: 10,
     orderBy: [
-        { log_id: "asc" },
-        { asset: "asc" },
-        { source_ip: "asc" },
-        { event: "desc" },
-    ]
+      { log_id: "asc" },
+      { asset: "asc" },
+      { source_ip: "asc" },
+      { event: "desc" },
+    ],
   });
  
   const lastPage = firstPage[firstPage.length - 1];
 
-  const nextPage = lastPage ? await prisma.Recent_Logs.findMany({
+  const nextPage = lastPage ? await prisma.recent_Logs.findMany({
         take: 10,
         skip: 1,
         cursor: { log_id: lastPage.log_id },
@@ -49,25 +39,24 @@ app.get("/dashboard", async (req, res) => {
         }
   }) : [];
 
-  const Recent_Logs = await prisma.Recent_Logs.findMany({
+  const Recent_Logs = await prisma.recent_Logs.findMany({
     orderBy: [
-      { log_id: "asc" },
-      { asset: "asc" },
-      { source_ip: "asc" },
-      { event: "desc" },
-      { severity: "asc" },
-      { action: "asc" },
+      { severity: "desc" },
       { log_time: "desc" },
-      { map: "asc" },
     ],
   });
 
-  res.json({ Recent_Alert_, Recent_Logs, firstPage, lastPage });
+  res.json({ Recent_Alert_, Recent_Logs, firstPage, lastPage, nextPage });
+  res.status(200).json({ message: "Dashboard data retrieved successfully" });
 });
 
 app.get("/logs", async (req, res) => {
-  const logs = await prisma.Recent_Logs.findMany();
-  res.json({ logs });
+  try {
+    const logs = await prisma.recent_Logs.findMany();
+    res.status(200).json({ message: "Login successful" });
+  } catch(error) {
+    res.status(500).json({ error: "Failed to retrieve logs" });
+  }
 });
 
 app.get("/clear", async (req, res) => {
@@ -78,63 +67,63 @@ app.get("/clear", async (req, res) => {
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const deleteShortestTerm = await prisma.Recent_Logs.deleteMany({
+    const deleteShortestTerm = await prisma.recent_Logs.deleteMany({
       where: {
         log_type: "SHORT_TERM",
         log_time: { lt: oneDayAgo },
       },
     });
 
-    const deleteShortTerm = await prisma.Recent_Logs.deleteMany({
+    const deleteShortTerm = await prisma.recent_Logs.deleteMany({
       where: {
         log_type: "SHORT_TERM",
         log_time: { lt: twoDaysAgo },
       },
     });
 
-    const deleteMediumTerm = await prisma.Recent_Logs.deleteMany({
+    const deleteMediumTerm = await prisma.recent_Logs.deleteMany({
       where: {
         log_type: "MEDIUM_TERM",
         log_time: { lt: sevenDaysAgo },
       },
     });
 
-    const deleteLongTerm = await prisma.Recent_Logs.deleteMany({
+    const deleteLongTerm = await prisma.recent_Logs.deleteMany({
       where: {
         log_type: "LONG_TERM",
         log_time: { lt: thirtyDaysAgo },
       },
     });
 
-    const deleteAlertsQuick = await prisma.Recent_Alert_.deleteMany({
+    const deleteAlertsQuick = await prisma.recent_Alert_.deleteMany({
       where: {
         log_type: "ALERT",
         alert_time: { lt: oneDayAgo },
       },
     });
 
-    const deleteAlertsShort = await prisma.Recent_Alert_.deleteMany({
+    const deleteAlertsShort = await prisma.recent_Alert_.deleteMany({
       where: {
         log_type: "ALERT",
         alert_time: { lt: twoDaysAgo },
       },
     });
 
-    const deleteAlertsMedium = await prisma.Recent_Alert_.deleteMany({
+    const deleteAlertsMedium = await prisma.recent_Alert_.deleteMany({
       where: {
         log_type: "ALERT",
         alert_time: { lt: sevenDaysAgo },
       },
     });
 
-    const deleteAlertsLong = await prisma.Recent_Alert_.deleteMany({
+    const deleteAlertsLong = await prisma.recent_Alert_.deleteMany({
       where: {
         log_type: "ALERT",
         alert_time: { lt: thirtyDaysAgo },
       },
     });
 
-    res.json({ deleteShortestTerm, deleteShortTerm, deleteMediumTerm, deleteLongTerm, deleteAlertsQuick, deleteAlertsShort, deleteAlertsMedium, deleteAlertsLong });
+    res.status(200).json({ message: "Old records cleared successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to clear old records" });
   }
