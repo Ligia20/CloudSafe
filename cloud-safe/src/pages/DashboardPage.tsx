@@ -192,7 +192,6 @@ const DashboardContent = () => {
             </IonCol> 
           </IonRow> 
         </IonGrid> 
-        <IonButton shape='round' color='primary' routerLink={'/Assets'} > View all Assets </IonButton> 
       </IonContent> 
     </IonPage> 
   ); 
