@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -12,25 +7,23 @@ datasource db {
   provider = "postgresql"
 }
 
-model Recent_Alert_ {
-  alert_id    String    @id @db.Uuid
-  severity    String?
-  alert_name_ String?   @map("alert_name ")
-  asset       String?
-  alert_time  DateTime? @db.Timestamp(6)
-  status      String?
-
-  @@map("Recent-Alert ")
-}
-
 model Recent_Logs {
-  log_id    String    @id @db.Uuid
+  log_id    String    @id(map: "Recent-Logs_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   asset     String?
   source_ip String?
   event     String?
   severity  String?
   action    String?
   log_time  DateTime? @db.Timestamp(6)
+}
 
-  @@map("Recent-Logs")
+model Recent_Alert_ {
+  alert_id    String    @id(map: "Recent-Alert _pkey") @db.Uuid
+  severity    String?
+  alert_name_ String?   @map("alert_name ")
+  asset       String?
+  alert_time  DateTime? @db.Timestamp(6)
+  status      String?
+
+  @@map("Recent-Alert")
 }
