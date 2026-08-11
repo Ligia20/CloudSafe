@@ -35,6 +35,17 @@ model Recent_Logs {
   @@map("Recent-Logs")
 }
 
+model Asset {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  type            String
+  ipAddress       String
+  status          String   @default("Pending")
+  hostname        String?
+  enrollmentToken String   @unique
+  lastSeen        DateTime?
+  createdAt       DateTime @default(now())
+} 
 enum Severity{
   LOW
   MEDIUM
