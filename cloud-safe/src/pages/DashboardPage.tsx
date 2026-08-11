@@ -1,250 +1,186 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { 
-  IonButton, 
-  IonButtons, 
-  IonContent, 
-  IonHeader, 
-  IonMenuButton, 
-  IonPage, 
-  IonIcon, 
-  IonTitle, 
-  IonToolbar, 
-  IonList,
-  IonItem,
-  IonLabel,
-  IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCardTitle,
-  IonBadge,
-} from '@ionic/react';
-import { cloud } from 'ionicons/icons';
-
+  IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, 
+  IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonCard, 
+  IonCardHeader, IonCardSubtitle, IonCardContent, IonGrid, IonRow, IonCol, 
+  IonCardTitle, IonBadge, IonText, 
+} from '@ionic/react'; 
+import { cloud } from 'ionicons/icons'; 
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-  ResponsiveContainer, BarChart, Bar, Cell 
-} from 'recharts';
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, 
+} from 'recharts'; 
+import { useQuery } from '@tanstack/react-query'; 
 
-const COLUMN_CONFIG = {
-  stats: {
-    assets: "Monitored Assets",
-    activeAlerts: "Active Alerts",
-    totalLogs: "Total Logs",
-    criticalAlerts: "Critical Alerts"
-  },
-    logsTable: {
-      incident: "Severity Incident",
-      target: "Asset",
-      source: "Source IP",
-      time: "Time",
-      action: "Action Taken"
-  }
-};
+const getBadgeColor = (severity: string | null) => { 
+  if (!severity) return 'medium'; 
+  switch (severity.toLowerCase().trim()) { 
+    case 'critical': return 'danger'; 
+    case 'high': return 'warning'; 
+    case 'medium': return 'primary'; 
+    case 'low': return 'success'; 
+    default: return 'medium'; 
+  } 
+}; 
 
-// --- HARDCODED DATA STRUCTURES ---
-const MOCK_STATS = [
-  { title: "Monitored Assets", value: "8", change: "+1 from yesterday", color: "success" },
-  { title: "Active Alerts", value: "3", change: "+2 from yesterday", color: "danger" },
-  { title: "Total Logs", value: "4,589", change: "+15% from yesterday", color: "success" },
-  { title: "Critical Alerts", value: "1", change: "No change", color: "medium" }
-];
+const API_URL = 'http://localhost:3000'; // Replace with your actual backend URL 
 
-const MOCK_LOGS = [
-  { severity: 'Critical', event: 'Brute Force Attack', asset: 'Web Server', time: '10:32 AM', sourceIp: '192.168.1.50', action: 'Blocked', color: 'danger' },
-  { severity: 'High', event: 'Port Scan Detected', asset: 'Web Server', time: '10:28 AM', sourceIp: '185.220.101.4', action: 'Logged', color: 'warning' },
-  { severity: 'Medium', event: 'Multiple Failed Logins', asset: 'DB Server', time: '10:17 AM', sourceIp: '10.0.0.12', action: 'Flagged', color: 'primary' }
-];
+const COLUMN_CONFIG = { 
+  stats: { assets: "Monitored Assets", activeAlerts: "Active Alerts", totalLogs: "Total Logs", criticalAlerts: "Critical Alerts" }, 
+  logsTable: { incident: "Severity Incident", target: "Asset", source: "Source IP", time: "Time", action: "Action Taken" } 
+}; 
 
-const MOCK_CHART_LOGS = [
-  { time: '12 AM', logs: 400 },
-  { time: '4 AM',  logs: 300 },
-  { time: '8 AM',  logs: 900 },
-  { time: '12 PM', logs: 1400 },
-  { time: '4 PM',  logs: 1100 },
-  { time: '8 PM',  logs: 1600 },
-  { time: '12 AM', logs: 1200 },
-];
+// --- HARDCODED DATA STRUCTURES --- 
+const MOCK_STATS = [ 
+  { title: "Monitored Assets", value: "8", change: "+1 from yesterday", color: "success" }, 
+  { title: "Active Alerts", value: "3", change: "+2 from yesterday", color: "danger" }, 
+  { title: "Total Logs", value: "4,589", change: "+15% from yesterday", color: "success" }, 
+  { title: "Critical Alerts", value: "1", change: "No change", color: "medium" } 
+]; 
 
-const MOCK_CHART_ASSETS = [
-  { name: 'Web Server', alerts: 12, color: '#eb445a' },
-  { name: 'DB Server', alerts: 7, color: '#f4a943' },
-  { name: 'VPN Gateway', alerts: 5, color: '#ffd534' },
-  { name: 'File Server', alerts: 2, color: '#2dd36f' },
-];
+const DashboardPage = () => { 
+  // Fetch unified dashboard data from your express backend server 
+  const { data, isPending, isError } = useQuery({ 
+    queryKey: ['securityDashboardData'], 
+    queryFn: () => fetch(`${API_URL}/dashboard`).then(res => { 
+      if (!res.ok) throw new Error('Failed to reach backend database service.'); 
+      return res.json(); 
+    }), 
+  }); 
 
-//const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const DashboardPage = () => {
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle 
-            color="primary"
-          >
-            <b>
-            <strong>
-               Cloud Safe  &nbsp;
-              <IonIcon slot="end" icon={cloud}></IonIcon>
-            </strong>
-            </b>
-          </IonTitle>
-        </IonToolbar>
-      </IonHeader>
+  // Extract variables safely or switch to fallbacks if your backend errors out 
+  const alerts = data?.Recent_Alert_ || []; 
+  const logsPaginationView = data?.firstPage || []; 
 
-      <IonContent className="ion-padding">
-        {/* Put your dashboard content, buttons, or charts here */}
-        <IonGrid>
-          <IonRow>
-            <IonCol>
-              <h1>Dashboard</h1>
-              <p>Overview of your security environment</p>
-            </IonCol>
-          </IonRow>
+  // Use live database counters if available; otherwise use fallback structures 
+  const displayStats = data ? [ 
+    { title: "Monitored Assets", value: "8", change: "Live Network Stream", color: "success" }, 
+    { title: "Active Alerts", value: String(alerts.filter((a: any) => a.status === 'Active').length), change: "Check Status", color: "danger" }, 
+    { title: "Total Logs", value: String(data?.Recent_Logs?.length || 0), change: "Indexed rows", color: "success" }, 
+    { title: "Critical Alerts", value: String(alerts.filter((a: any) => a.severity === 'Critical').length), change: "Urgent items", color: "medium" } 
+  ] : MOCK_STATS; 
 
-          <IonRow>
-            {MOCK_STATS.map((stat, index) => (
-              <IonCol size="12" size-md="6" size-lg="3" key={index}>
-                <IonCard color={stat.color}>
-                  <IonCardHeader>
-                    <IonTitle>{stat.title}</IonTitle>
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <h2>{stat.value}</h2>
-                    <p>{stat.change}</p>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-            ))}
-          </IonRow>
+  // Dynamically map real database logs to chart structure variables
+  const CHART_LOGS = logsPaginationView.map((log: any) => ({
+    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+    logs: 350
+  }));
 
-          <IonRow>
-            <IonCol size="12" size-md="6">
-              <IonCard style={{ marigin: '0',height: '100%' }}>
-                <IonCardHeader>
-                  <IonCardTitle>Logs Over Time</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={MOCK_CHART_LOGS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="time" />
-                      <YAxis /> 
-                      <RechartsTooltip />
-                      <Area type="monotone" dataKey="logs" stroke="#8884d8" fill="#8884d8" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
+  // Aggregates alerts per unique asset name automatically from database records
+  const assetAlertMap: { [key: string]: number } = {};
+  alerts.forEach((alert: any) => {
+    if (alert.asset) assetAlertMap[alert.asset] = (assetAlertMap[alert.asset] || 0) + 1;
+  });
+  const CHART_ASSETS = Object.keys(assetAlertMap).map(name => ({
+    name: name,
+    alerts: assetAlertMap[name]
+  }));
 
-            <IonCol size="12" size-md="6">
-              <IonCard style={{ marigin: '0',height: '100%' }}>
-                <IonCardHeader>
-                  <IonCardTitle style={{ fontsize: '1.2rem' }}>Top Assets By Alert</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent> 
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={MOCK_CHART_ASSETS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <RechartsTooltip />
-                      <Area type="monotone" dataKey="alerts" stroke="#82ca9d" fill="#82ca9d" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-          <IonRow>
-            <IonCol size="12" size-md="6">
-              <IonButton shape='round' color='primary' routerLink={'/Assets'}>
-                View all Assets
-              </IonButton>
-              <IonCard style={{ maxWidth: '350px' }}>
-                <IonList lines="full">
-                  {MOCK_LOGS.map((log, index) => (
-                    <IonItem key={index} color={log.color}>
-                      <IonBadge color={log.color} slot="start">{log.severity}</IonBadge>
-                      <IonLabel>
-                        <h2>{log.event}</h2>
-                        <p>Asset: {log.asset}</p>
-                        <p>Time: {log.time}</p>
-                      </IonLabel>
-                    </IonItem>
-                  ))}
-                </IonList>
-              </IonCard>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
-        <IonCard>
-            <IonCardHeader>
-              <IonTitle> Security Overview</IonTitle>
-              <IonCardSubtitle> Card subtitle </IonCardSubtitle>
-              <IonCardContent>
-                Here is a small test description of the card content!
-              </IonCardContent>
-            </IonCardHeader>
-          </IonCard>
-                    <IonCard
-            style={{ maxWidth: '350px' }}
-          >
-            <IonCardHeader>
-              <IonTitle> Security Overview</IonTitle>
-              <IonCardSubtitle> Card subtitle </IonCardSubtitle>
-              <IonCardContent>
-                Here is a small test description of the card content!
-              </IonCardContent>
-            </IonCardHeader>
-          </IonCard>
+  // Map backend logs schema layout attributes directly into list item UI loops
+  const LIVE_LOGS = logsPaginationView.map((log: any) => ({
+    severity: log.severity || 'Info',
+    event: log.event || 'System Event',
+    asset: log.asset || 'N/A',
+    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+    color: getBadgeColor(log.severity)
+  }));
+
+  return ( 
+    <IonPage> 
+      <IonHeader> 
+        <IonToolbar style={{ backgroundColor: '#f8f9fa' }}> 
+          <IonButtons slot="start"> 
+            <IonMenuButton /> 
+          </IonButtons> 
+          <IonTitle color="primary" > 
+            <b> <strong> Cloud Safe &nbsp; <IonIcon slot="end" icon={cloud}></IonIcon> </strong> </b> 
+          </IonTitle> 
+        </IonToolbar> 
+      </IonHeader> 
+      <IonContent className="ion-padding"> 
+        <IonGrid fixed> 
+          <IonRow> 
+            <h1 style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#ffff' }} > Overview of your security environment </h1> 
+          </IonRow> 
+        </IonGrid> 
         
-          <IonList>
-            <IonItem>
-              <IonLabel>Pokémon Yellow</IonLabel>
-            </IonItem>
-          <IonItem>
-            <IonLabel>Mega Man X</IonLabel>
-          </IonItem>
-          <IonItem>
-            <IonLabel>The Legend of Zelda</IonLabel>
-          </IonItem>
-          <IonItem>
-            <IonLabel>Pac-Man</IonLabel>
-          </IonItem>
-      </IonList>
-    
-          <IonButton
-            shape='round'
-            color='primary'
-            routerLink={'/Assets'}
-          >
-            View all Assets
-          </IonButton>
-          <IonList>
-            <IonItem>
-              <IonLabel>
-                <h2>Recent Logs</h2>
-                <p>Time</p>
-                <p>Asset</p>
-                <p>SourceIP</p>
-                <p>Event</p>
-                <p>Severity</p>
-                <p>Action</p>
-              </IonLabel>
-            </IonItem>
-          </IonList>
-      </IonContent>
-
-    </IonPage>
-  );
-};
+        <IonGrid> 
+          <IonRow> 
+            {/* CHANGE: stat.map now reads from the 'displayStats' query variable instead of the broken, undefined 'stats' state */}
+            {displayStats.map((stat, index) => ( 
+              <IonCol size="12" sizeSm="6" sizeMd="3" key={index}> 
+                <IonCard> 
+                  <IonCardHeader> 
+                    <IonCardSubtitle>{stat.title}</IonCardSubtitle> 
+                    <IonCardTitle> {stat.value} </IonCardTitle> 
+                  </IonCardHeader> 
+                  <IonCardContent> 
+                    <IonText color={stat.color}> {stat.change} </IonText> 
+                  </IonCardContent> 
+                </IonCard> 
+              </IonCol> 
+            ))} 
+          </IonRow> 
+          <IonRow> 
+            <IonCol size="12" size-md="6"> 
+              <IonCard style={{ margin: '0', height: '100%' }}> 
+                <IonCardHeader> 
+                  <IonCardTitle>Logs Over Time</IonCardTitle> 
+                </IonCardHeader> 
+                <IonCardContent> 
+                  <ResponsiveContainer width="100%" height={300}> 
+                    {/* CHANGE: Switched from static MOCK_CHART_LOGS to database-mapped CHART_LOGS with fallback check to avoid crashes */}
+                    <AreaChart data={CHART_LOGS.length ? CHART_LOGS : [{ time: '00:00', logs: 0 }]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+                      <CartesianGrid strokeDasharray="3 3" /> 
+                      <XAxis dataKey="time" /> 
+                      <YAxis /> 
+                      <RechartsTooltip /> 
+                      <Area type="monotone" dataKey="logs" stroke="#8884d8" fill="#8884d8" /> 
+                    </AreaChart> 
+                  </ResponsiveContainer> 
+                </IonCardContent> 
+              </IonCard> 
+            </IonCol> 
+            <IonCol size="12" size-md="6"> 
+              <IonCard style={{ margin: '0', height: '100%' }}> 
+                <IonCardHeader> 
+                  <IonCardTitle style={{ fontSize: '1.2rem' }}>Top Assets By Alert</IonCardTitle> 
+                </IonCardHeader> 
+                <IonCardContent> 
+                  <ResponsiveContainer width="100%" height={300}> 
+                    {/* CHANGE: Switched from static MOCK_CHART_ASSETS to the database-aggregated CHART_ASSETS array data source */}
+                    <AreaChart data={CHART_ASSETS.length ? CHART_ASSETS : [{ name: 'None', alerts: 0 }]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+                      <CartesianGrid strokeDasharray="3 3" /> 
+                      <XAxis dataKey="name" /> 
+                      <YAxis /> 
+                      <RechartsTooltip /> 
+                      <Area type="monotone" dataKey="alerts" stroke="#82ca9d" fill="#82ca9d" /> 
+                    </AreaChart> 
+                  </ResponsiveContainer> 
+                </IonCardContent> 
+              </IonCard> 
+            </IonCol> 
+          </IonRow> 
+          <IonRow> 
+            <IonCol size="12" size-md="6"> 
+              <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all Assets </IonButton> 
+              <IonCard style={{ maxWidth: '350px' }}> 
+                <IonList lines="full"> 
+                  {/* CHANGE: Switched loop from hardcoded variable to LIVE_LOGS populated straight from the database firstPage query result */}
+                  {LIVE_LOGS.map((log, index) => ( 
+                    <IonItem key={index} color={log.color}> 
+                      <IonBadge color={log.color} slot="start">{log.severity}</IonBadge> 
+                      <IonLabel> <h2>{log.event}</h2> <p>Asset: {log.asset}</p> <p>Time: {log.time}</p> </IonLabel> 
+                    </IonItem> 
+                  ))} 
+                </IonList> 
+              </IonCard> 
+            </IonCol> 
+          </IonRow> 
+        </IonGrid> 
+        <IonButton shape='round' color='primary' routerLink={'/Assets'} > View all Assets </IonButton> 
+      </IonContent> 
+    </IonPage> 
+  ); 
+}; 
 
 export default DashboardPage;
