@@ -181,11 +181,13 @@ app.get("/clear", async (req, res) => {
 
 app.get("/assets", async (req, res) => {
   try {
-    const logs = await prisma.recent_Logs.findMany();
-    res.status(200).json({ message: "Assets retrieved successfully", logs });
+    const freshAssets = await prisma.asset.findMany();
+    console.log("Fresh Assets:", freshAssets);
+    res.status(200).json({ message: "Assets retrieved successfully", assets: freshAssets });
   } catch(error) {
     res.status(500).json({ error: "Failed to retrieve assets" });
   }
+  
 });
 
 app.listen(PORT, () => {

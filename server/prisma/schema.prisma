@@ -45,6 +45,8 @@ model Asset {
   enrollmentToken String   @unique
   lastSeen        DateTime?
   createdAt       DateTime @default(now())
+
+  @@map("Assets")
 } 
 enum Severity{
   LOW
