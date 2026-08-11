@@ -6,7 +6,7 @@ import {
 
 const Log: React.FC = () => {
   interface LogItem {
-    log_id: number;
+    log_id: string;
     asset: string;
     source_ip: string;
     event: string;
