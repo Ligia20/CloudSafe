@@ -1,6 +1,7 @@
 import {
  IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonSearchbar, IonSelect, IonSelectOption, IonButton, IonPopover} from '@ionic/react';
  import React, { useEffect, useState } from 'react';
+ import "./log.css";
 
 
 const Log: React.FC = () => {
@@ -23,23 +24,26 @@ const [selectedTime, setSelectedTime] = useState('all');
          }, []);
 
   return (
-    <IonPage>
+    <IonPage className  = "log-page">
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Logs</IonTitle>
+          <IonTitle className = "title">Logs</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent>View and analyze security events and systems logs</IonContent>
-
       <IonContent>
-        <IonSearchbar
+
+      <div className= "title-content">View and analyze security events and systems logs</div>
+
+      <div className = "search-bar-content">
+        <IonSearchbar className = "search-bar"
         //debounce = {} needs to be installed 
             value={searchText}
             onIonInput={e => setSearchText(e.detail.value!)} >
+        </IonSearchbar>
         
 
-        <IonSelect placeholder='All Severities'
+        <IonSelect className = "search-bar_severities" placeholder='All Severities'
           value={selectedSeverity}
           onIonChange={e => setSelectedSeverity(e.detail.value)}>
           <IonSelectOption value='all'>All Severities</IonSelectOption>
@@ -50,7 +54,7 @@ const [selectedTime, setSelectedTime] = useState('all');
           <IonSelectOption value='info'>Informational</IonSelectOption>
         </IonSelect>
 
-        <IonSelect placeholder='All Assets'
+        <IonSelect className = "search-bar_assets" placeholder='All Assets'
           value={selectedAsset}
           onIonChange={e => setSelectedAsset(e.detail.value)}>
           <IonSelectOption value='all'>All Assets</IonSelectOption>
@@ -65,36 +69,38 @@ const [selectedTime, setSelectedTime] = useState('all');
 
 
 
-        <IonButton onClick={() => setIsOpen(true)}>Filter</IonButton>
+        <IonButton
+        className = "search-bar_filterBtn"
+         onClick={() => setIsOpen(true)}>Filter</IonButton>
+         </div>
         <IonPopover
           isOpen={isOpen}
           onDidDismiss={() => setIsOpen(false)}
         >
+          <IonContent>
 
-              <IonSelect placeholder='sort by'
+              <IonSelect className = "search-bar_sortDt"placeholder='sort by'
                 value={selectedSort}
                 onIonChange={e => setSelectedSort(e.detail.value)}>
                   <IonSelectOption value='newest'>Newest</IonSelectOption>
                   <IonSelectOption value='oldest'>Oldest</IonSelectOption>
               </IonSelect>
 
-              <IonSelect placeholder='time range'
+              <IonSelect className = "search-bar_timeRange" placeholder='time range'
                 value={selectedTime}
                 onIonChange={e => setSelectedTime(e.detail.value)}>
                   <IonSelectOption value='all'>All time </IonSelectOption>
                   <IonSelectOption value='24hrs'>Last 24 hours</IonSelectOption>
+                  <IonSelectOption value='48hrs'>Last 48 hours</IonSelectOption>
                   <IonSelectOption value='7days'>Last 7 days</IonSelectOption>
                   <IonSelectOption value='30days'>Last 30 days</IonSelectOption>
               </IonSelect>
 
             {/*MAYBE ADD ACTION FILTER ACCESSED,DENIED, BLOCKED, FLAGGED*/}
-
+          </IonContent>
          
             </IonPopover>
-
-
-        </IonSearchbar>
-      </IonContent>
+            </IonContent>
     </IonPage>
     
 

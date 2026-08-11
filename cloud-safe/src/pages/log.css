@@ -1,0 +1,48 @@
+.log-page{
+
+}
+.title{
+
+}
+
+.title-content{
+display:flex;
+align-items: center;
+justify-content: center;
+margin-top: 20px;
+margin-bottom: 20px;
+
+}
+
+.search-bar-content{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px
+}
+
+.search-bar{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 350px;
+    min-width: 350px;
+    flex-shrink:0;
+    border:1px solid #555;
+    border-radius: 8px;
+
+}
+
+.search-bar_severities{
+
+}
+
+.search-bar_assets{
+
+}
+
+.search-bar_filterBtn{
+
+}
+
+
