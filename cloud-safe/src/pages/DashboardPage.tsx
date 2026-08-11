@@ -7,9 +7,11 @@ import {
 } from '@ionic/react'; 
 import { cloud } from 'ionicons/icons'; 
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer 
 } from 'recharts'; 
-import { useQuery } from '@tanstack/react-query'; 
+import { useQuery, QueryClientProvider, QueryClient } from '@tanstack/react-query'; 
+
+const queryClient = new QueryClient(); 
 
 const getBadgeColor = (severity: string | null) => { 
   if (!severity) return 'medium'; 
@@ -22,12 +24,7 @@ const getBadgeColor = (severity: string | null) => {
   } 
 }; 
 
-const API_URL = 'http://localhost:3000'; // Replace with your actual backend URL 
-
-const COLUMN_CONFIG = { 
-  stats: { assets: "Monitored Assets", activeAlerts: "Active Alerts", totalLogs: "Total Logs", criticalAlerts: "Critical Alerts" }, 
-  logsTable: { incident: "Severity Incident", target: "Asset", source: "Source IP", time: "Time", action: "Action Taken" } 
-}; 
+const API_URL = 'http://localhost:3000'; 
 
 // --- HARDCODED DATA STRUCTURES --- 
 const MOCK_STATS = [ 
@@ -37,21 +34,39 @@ const MOCK_STATS = [
   { title: "Critical Alerts", value: "1", change: "No change", color: "medium" } 
 ]; 
 
-const DashboardPage = () => { 
-  // Fetch unified dashboard data from your express backend server 
-  const { data, isPending, isError } = useQuery({ 
+const MOCK_LOGS = [ 
+  { severity: 'Critical', event: 'Brute Force Attack', asset: 'Web Server', time: '10:32 AM', color: 'danger' }, 
+  { severity: 'High', event: 'Port Scan Detected', asset: 'Web Server', time: '10:28 AM', color: 'warning' }, 
+  { severity: 'Medium', event: 'Multiple Failed Logins', asset: 'DB Server', time: '10:17 AM', color: 'primary' } 
+]; 
+
+const MOCK_CHART_LOGS = [ 
+  { time: '12 AM', logs: 400 }, { time: '4 AM', logs: 300 }, { time: '8 AM', logs: 900 }, 
+  { time: '12 PM', logs: 1400 }, { time: '4 PM', logs: 1100 }, { time: '8 PM', logs: 1600 } 
+]; 
+
+const MOCK_CHART_ASSETS = [ 
+  { name: 'Web Server', alerts: 12 }, { name: 'DB Server', alerts: 7 }, 
+  { name: 'VPN Gateway', alerts: 5 }, { name: 'File Server', alerts: 2 } 
+];
+
+// ==========================================
+// FIX 1: Renamed this to DashboardContent. 
+// It safely holds useQuery because it runs UNDER the Provider now.
+// ==========================================
+const DashboardContent = () => { 
+  const { data, isError } = useQuery({ 
     queryKey: ['securityDashboardData'], 
     queryFn: () => fetch(`${API_URL}/dashboard`).then(res => { 
       if (!res.ok) throw new Error('Failed to reach backend database service.'); 
       return res.json(); 
     }), 
+    retry: false
   }); 
 
-  // Extract variables safely or switch to fallbacks if your backend errors out 
   const alerts = data?.Recent_Alert_ || []; 
   const logsPaginationView = data?.firstPage || []; 
 
-  // Use live database counters if available; otherwise use fallback structures 
   const displayStats = data ? [ 
     { title: "Monitored Assets", value: "8", change: "Live Network Stream", color: "success" }, 
     { title: "Active Alerts", value: String(alerts.filter((a: any) => a.status === 'Active').length), change: "Check Status", color: "danger" }, 
@@ -59,30 +74,28 @@ const DashboardPage = () => {
     { title: "Critical Alerts", value: String(alerts.filter((a: any) => a.severity === 'Critical').length), change: "Urgent items", color: "medium" } 
   ] : MOCK_STATS; 
 
-  // Dynamically map real database logs to chart structure variables
-  const CHART_LOGS = logsPaginationView.map((log: any) => ({
-    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-    logs: 350
-  }));
+  const CHART_LOGS = data && logsPaginationView.length ? logsPaginationView.map((log: any) => ({ 
+    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A', 
+    logs: 350 
+  })) : MOCK_CHART_LOGS; 
 
-  // Aggregates alerts per unique asset name automatically from database records
-  const assetAlertMap: { [key: string]: number } = {};
-  alerts.forEach((alert: any) => {
-    if (alert.asset) assetAlertMap[alert.asset] = (assetAlertMap[alert.asset] || 0) + 1;
-  });
-  const CHART_ASSETS = Object.keys(assetAlertMap).map(name => ({
-    name: name,
-    alerts: assetAlertMap[name]
-  }));
+  const assetAlertMap: { [key: string]: number } = {}; 
+  alerts.forEach((alert: any) => { 
+    if (alert.asset) assetAlertMap[alert.asset] = (assetAlertMap[alert.asset] || 0) + 1; 
+  }); 
+  
+  const CHART_ASSETS = data && Object.keys(assetAlertMap).length ? Object.keys(assetAlertMap).map(name => ({ 
+    name: name, 
+    alerts: assetAlertMap[name] 
+  })) : MOCK_CHART_ASSETS; 
 
-  // Map backend logs schema layout attributes directly into list item UI loops
-  const LIVE_LOGS = logsPaginationView.map((log: any) => ({
-    severity: log.severity || 'Info',
-    event: log.event || 'System Event',
-    asset: log.asset || 'N/A',
-    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-    color: getBadgeColor(log.severity)
-  }));
+  const LIVE_LOGS = data && logsPaginationView.length ? logsPaginationView.map((log: any) => ({ 
+    severity: log.severity || 'Info', 
+    event: log.event || 'System Event', 
+    asset: log.asset || 'N/A', 
+    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A', 
+    color: getBadgeColor(log.severity) 
+  })) : MOCK_LOGS; 
 
   return ( 
     <IonPage> 
@@ -103,9 +116,14 @@ const DashboardPage = () => {
           </IonRow> 
         </IonGrid> 
         
+        {isError && (
+          <div style={{ background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+            <strong>Local Sandbox Mode Active:</strong> Backend API server unreachable. Displaying fallback mock records.
+          </div>
+        )}
+
         <IonGrid> 
           <IonRow> 
-            {/* CHANGE: stat.map now reads from the 'displayStats' query variable instead of the broken, undefined 'stats' state */}
             {displayStats.map((stat, index) => ( 
               <IonCol size="12" sizeSm="6" sizeMd="3" key={index}> 
                 <IonCard> 
@@ -128,8 +146,7 @@ const DashboardPage = () => {
                 </IonCardHeader> 
                 <IonCardContent> 
                   <ResponsiveContainer width="100%" height={300}> 
-                    {/* CHANGE: Switched from static MOCK_CHART_LOGS to database-mapped CHART_LOGS with fallback check to avoid crashes */}
-                    <AreaChart data={CHART_LOGS.length ? CHART_LOGS : [{ time: '00:00', logs: 0 }]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+                    <AreaChart data={CHART_LOGS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
                       <CartesianGrid strokeDasharray="3 3" /> 
                       <XAxis dataKey="time" /> 
                       <YAxis /> 
@@ -147,8 +164,7 @@ const DashboardPage = () => {
                 </IonCardHeader> 
                 <IonCardContent> 
                   <ResponsiveContainer width="100%" height={300}> 
-                    {/* CHANGE: Switched from static MOCK_CHART_ASSETS to the database-aggregated CHART_ASSETS array data source */}
-                    <AreaChart data={CHART_ASSETS.length ? CHART_ASSETS : [{ name: 'None', alerts: 0 }]} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
+                    <AreaChart data={CHART_ASSETS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
                       <CartesianGrid strokeDasharray="3 3" /> 
                       <XAxis dataKey="name" /> 
                       <YAxis /> 
@@ -165,7 +181,6 @@ const DashboardPage = () => {
               <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all Assets </IonButton> 
               <IonCard style={{ maxWidth: '350px' }}> 
                 <IonList lines="full"> 
-                  {/* CHANGE: Switched loop from hardcoded variable to LIVE_LOGS populated straight from the database firstPage query result */}
                   {LIVE_LOGS.map((log, index) => ( 
                     <IonItem key={index} color={log.color}> 
                       <IonBadge color={log.color} slot="start">{log.severity}</IonBadge> 
@@ -182,5 +197,17 @@ const DashboardPage = () => {
     </IonPage> 
   ); 
 }; 
+
+// ==========================================
+// FIX 2: This is what App Router links to.
+// It wraps the provider on the outside BEFORE the hooks run!
+// ==========================================
+const DashboardPage = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DashboardContent />
+    </QueryClientProvider>
+  );
+};
 
 export default DashboardPage;
