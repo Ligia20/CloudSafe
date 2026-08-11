@@ -5,20 +5,28 @@ import {
 
 
 const Log: React.FC = () => {
+  interface LogItem {
+    log_id: number;
+    asset: string;
+    source_ip: string;
+    event: string;
+    severity: string;
+    action: string;
+    log_time: string;
+  }
 const [searchText, setSearchText] = useState("");
 const [selectedSeverity, setSelectedSeverity] = useState('all');
 const [selectedAsset, setSelectedAsset] = useState('all');
 const [selectedSort, setSelectedSort] = useState('newest');
 const [isOpen, setIsOpen] = useState(false);
 const [selectedTime, setSelectedTime] = useState('all');
-// const [logs, setLogs] = useState([]);
+const [logs, setLogs] = useState<LogItem[]>([]);
 
     useEffect(() => {
             const getLogs = async () => {
-                const response = await fetch ('API ROUTE');
+                const response = await fetch ('http://localhost:3000/logs');
                 const data = await response.json();
-                setLogs(data);
-
+                setLogs(data.logs);
             };
             getLogs();
          }, []);
@@ -98,8 +106,21 @@ const [selectedTime, setSelectedTime] = useState('all');
 
             {/*MAYBE ADD ACTION FILTER ACCESSED,DENIED, BLOCKED, FLAGGED*/}
           </IonContent>
-         
             </IonPopover>
+            <div className = "logs-container">
+              {logs.map((log)=> {
+                return (
+                  <div key={log.log_id}>
+                    <p>{log.asset}</p>
+                    <p>{log.source_ip}</p>
+                    <p>{log.event}</p>
+                    <p>{log.severity}</p>
+                    <p>{log.action}</p>
+                    <p>{log.log_time}</p>
+                  </div>
+                );
+              })}
+            </div>
             </IonContent>
     </IonPage>
     
