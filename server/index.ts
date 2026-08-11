@@ -12,14 +12,7 @@ app.use(express.json());
 app.get("/dashboard", async (req, res) => {
   const Recent_Alert_ = await prisma.recent_Alert_.findMany({
     orderBy: [
-      { alert_id: "asc" },
-      { severity: "asc" },
-      { alert_name_String: "asc" },
-      { asset: "asc" },
-      { alert_time: "desc" },
-      { status: "asc" },
-      { createdAt: "desc" },
-      { map: "asc" },
+      { severity: "desc" },
     ],
   });
 
@@ -48,14 +41,8 @@ app.get("/dashboard", async (req, res) => {
 
   const Recent_Logs = await prisma.recent_Logs.findMany({
     orderBy: [
-      { log_id: "asc" },
-      { asset: "asc" },
-      { source_ip: "asc" },
-      { event: "desc" },
-      { severity: "asc" },
-      { action: "asc" },
+      { severity: "desc" },
       { log_time: "desc" },
-      { map: "asc" },
     ],
   });
 
@@ -66,7 +53,7 @@ app.get("/dashboard", async (req, res) => {
 app.get("/logs", async (req, res) => {
   try {
     const logs = await prisma.recent_Logs.findMany();
-    res.status(200).json({ logs, message: "Logs retrieved successfully" });
+    res.status(200).json({ message: "Login successful" });
   } catch(error) {
     res.status(500).json({ error: "Failed to retrieve logs" });
   }
