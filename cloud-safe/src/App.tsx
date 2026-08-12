@@ -5,6 +5,7 @@ import Menu from './components/Menu';
 import Page from './pages/Page';
 import Log from './pages/log';
 import DashboardPage from './pages/DashboardPage';
+import Assets from './pages/Assets';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -49,8 +50,8 @@ const App: React.FC = () => {
             <Route path="/" exact={true}>
               <Redirect to="/folder/Inbox" />
             </Route>
-            <Route path="/folder/:name" exact={true}>
-              <Page />
+            <Route path="/Assets" exact={true}>
+              <Assets />
             </Route>
             <Route path="/log" exact={true}>
               <Log />
