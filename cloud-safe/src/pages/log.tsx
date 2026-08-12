@@ -7,7 +7,7 @@ import {
 const Log: React.FC = () => {
   interface LogItem {
     log_id: string;
-    asset: string;
+    asset: string | null;
     source_ip: string;
     event: string;
     severity: string;
@@ -26,10 +26,67 @@ const [logs, setLogs] = useState<LogItem[]>([]);
             const getLogs = async () => {
                 const response = await fetch ('http://localhost:3000/logs');
                 const data = await response.json();
-                setLogs(data.logs);
+                console.log(data);
+                console.log("DATA:", data);
+                console.log("DATA.LOGS:", data.logs);
+                setLogs(data.logs ?? []);
             };
             getLogs();
          }, []);
+
+         const filteredLogs = logs.filter((log) => {
+          
+          const matchesSearch=
+            log.asset?.toLowerCase().includes(searchText.toLowerCase()) || 
+            log.event?.toLowerCase().includes(searchText.toLowerCase()) ||
+            log.severity?.toLowerCase().includes(searchText.toLowerCase()) ||
+            log.action?.toLowerCase().includes(searchText.toLowerCase()) ||
+            log.source_ip?.toLowerCase().includes(searchText.toLowerCase());
+
+          const matchesSeverity =
+            selectedSeverity === "all" ||
+            log.severity?.toLowerCase() === selectedSeverity.toLowerCase();
+
+          const matchesAsset =
+            selectedAsset === "all" ||
+            log.asset?.toLowerCase().replace(" ", "-") === selectedAsset.toLowerCase();
+
+          const logDate = new Date(log.log_time);
+          const now = new Date();
+
+          let matchesTime = true;
+
+          if (selectedTime === "24hrs") {
+            matchesTime =
+              now.getTime() - logDate.getTime() <= 24 * 60 * 60 * 1000;
+  }
+          if (selectedTime === "48hrs") {
+            matchesTime =
+              now.getTime() - logDate.getTime() <= 48 * 60 * 60 * 1000;
+          }
+          if (selectedTime === "7days") {
+            matchesTime =
+              now.getTime() - logDate.getTime() <= 7 * 24 * 60 * 60 * 1000;
+          }
+          if (selectedTime === "30days") {
+            matchesTime =
+              now.getTime() - logDate.getTime() <= 30 * 24 * 60 * 60 * 1000;
+          }
+
+        return matchesSearch && matchesSeverity && matchesAsset && matchesTime;
+});
+
+      const sortedLogs = [...filteredLogs].sort((a, b) => {
+  const timeA = new Date(a.log_time).getTime();
+  const timeB = new Date(b.log_time).getTime();
+
+  if (selectedSort === "newest") {
+    return timeB - timeA;
+  }
+
+  return timeA - timeB;
+});
+   
 
   return (
     <IonPage className  = "log-page">
@@ -108,15 +165,24 @@ const [logs, setLogs] = useState<LogItem[]>([]);
           </IonContent>
             </IonPopover>
             <div className = "logs-container">
-              {logs.map((log)=> {
+
+              <div className="log-header">
+                <p>Asset</p>
+                <p>Source IP</p>
+                <p>Event</p>
+                <p>Severity</p>
+                <p>Action</p>
+                <p>Time</p>
+              </div>
+              {sortedLogs.map((log)=> {
                 return (
-                  <div key={log.log_id}>
+                  <div key={log.log_id} className  = "log-row">
                     <p>{log.asset}</p>
                     <p>{log.source_ip}</p>
                     <p>{log.event}</p>
                     <p>{log.severity}</p>
                     <p>{log.action}</p>
-                    <p>{log.log_time}</p>
+                    <p>{new Date(log.log_time).toLocaleString()}</p>
                   </div>
                 );
               })}

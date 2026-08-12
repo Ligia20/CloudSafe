@@ -15,6 +15,8 @@ model Recent_Logs {
   severity  String?
   action    String?
   log_time  DateTime? @db.Timestamp(6)
+
+@@map("Recent_Logs")
 }
 
 model Recent_Alert_ {
@@ -28,6 +30,17 @@ model Recent_Alert_ {
   @@map("Recent-Alert")
 }
 
+model Asset {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  type            String
+  ipAddress       String
+  status          String   @default("Pending")
+  hostname        String?
+  enrollmentToken String   @unique
+  lastSeen        DateTime?
+  createdAt       DateTime @default(now())
+} 
 enum Severity{
   LOW
   MEDIUM
