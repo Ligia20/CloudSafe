@@ -56,6 +56,7 @@ app.get("/logs", async (req, res) => {
     res.status(200).json({ message: "Logs retrieved successfully", logs });
   } catch(error) {
     res.status(500).json({ error: "Failed to retrieve logs" });
+    console.error(error);
   }
 });
 
