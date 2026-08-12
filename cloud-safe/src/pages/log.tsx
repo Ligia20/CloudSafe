@@ -73,6 +73,7 @@ const [logs, setLogs] = useState<LogItem[]>([]);
               now.getTime() - logDate.getTime() <= 30 * 24 * 60 * 60 * 1000;
           }
 
+          
         return matchesSearch && matchesSeverity && matchesAsset && matchesTime;
 });
 
