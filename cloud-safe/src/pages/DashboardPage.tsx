@@ -5,7 +5,7 @@ import {
   IonCardHeader, IonCardSubtitle, IonCardContent, IonGrid, IonRow, IonCol, 
   IonCardTitle, IonBadge, IonText, 
 } from '@ionic/react'; 
-import { cloud } from 'ionicons/icons'; 
+import { bug, cloud, globe, lockClosed, person } from 'ionicons/icons'; 
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer 
 } from 'recharts'; 
@@ -104,18 +104,15 @@ const DashboardContent = () => {
           <IonButtons slot="start"> 
             <IonMenuButton /> 
           </IonButtons> 
-          <IonTitle color="primary" > 
+          <IonTitle color="primary" style={{ fontSize: '3rem' }}>
             <b> <strong> Cloud Safe &nbsp; <IonIcon slot="end" icon={cloud}></IonIcon> </strong> </b> 
           </IonTitle> 
         </IonToolbar> 
       </IonHeader> 
       <IonContent className="ion-padding"> 
-        <IonGrid fixed> 
           <IonRow> 
-            <h1 style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#ffff' }} > Overview of your security environment </h1> 
-          </IonRow> 
-        </IonGrid> 
-        
+            <h1 style={{ color: '#4370e0', fontWeight: 'bold', margin: '30 30 20px 0' }} > &nbsp; Overview of your Security Environment </h1> 
+          </IonRow>    
         {isError && (
           <div style={{ background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
             <strong>Local Sandbox Mode Active:</strong> Backend API server unreachable. Displaying fallback mock records.
@@ -176,9 +173,11 @@ const DashboardContent = () => {
               </IonCard> 
             </IonCol> 
           </IonRow> 
+
           <IonRow> 
             <IonCol size="12" size-md="6"> 
               <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all Assets </IonButton> 
+              <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all logs </IonButton> 
               <IonCard style={{ maxWidth: '350px' }}> 
                 <IonList lines="full"> 
                   {LIVE_LOGS.map((log, index) => ( 
@@ -189,8 +188,61 @@ const DashboardContent = () => {
                   ))} 
                 </IonList> 
               </IonCard> 
-            </IonCol> 
+            </IonCol>
           </IonRow> 
+          
+          <IonRow>
+            <h1 style={{ color: '#4370e0', fontWeight: 'bold', margin: '30 30 20px 0' }} >
+              &nbsp; Attack Simulator &nbsp;
+            </h1>
+          </IonRow>
+            <IonGrid> 
+              <IonRow> 
+                  <IonCol size="12" sizeSm="6" sizeMd="3" > 
+                   <IonCard> 
+                      <IonCardHeader> 
+                          <IonCardTitle className="ion-display-flex ion-align-items-center" >  
+                            Brute Force  &nbsp;
+                              <IonIcon  icon={lockClosed} ></IonIcon>
+                          </IonCardTitle> 
+                      </IonCardHeader> 
+                      <IonCardSubtitle>
+                      </IonCardSubtitle>
+                  </IonCard> 
+                  </IonCol> 
+                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
+                   <IonCard> 
+                      <IonCardHeader> 
+                          <IonCardTitle> 
+                            Port Scan &nbsp;
+                            <IonIcon  icon={globe} ></IonIcon>
+                          </IonCardTitle> 
+                      </IonCardHeader> 
+                  </IonCard> 
+                  </IonCol> 
+                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
+                   <IonCard> 
+                      <IonCardHeader> 
+                          <IonCardTitle> 
+                            Malware &nbsp;
+                              <IonIcon  icon={bug} ></IonIcon>
+                          </IonCardTitle> 
+                      </IonCardHeader> 
+                  </IonCard> 
+                  </IonCol> 
+                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
+                   <IonCard> 
+                      <IonCardHeader> 
+                          <IonCardTitle> 
+                            Unauthorized Acccess &nbsp;
+                              <IonIcon  icon={person} ></IonIcon>
+                          </IonCardTitle> 
+                      </IonCardHeader> 
+                  </IonCard> 
+                  </IonCol> 
+                </IonRow> 
+            </IonGrid>
+
         </IonGrid> 
       </IonContent> 
     </IonPage> 
