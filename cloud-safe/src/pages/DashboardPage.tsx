@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   IonPage,
   IonHeader,
@@ -40,48 +41,103 @@ import {
 } from "recharts";
 
 import {
-  QueryClient,
-  QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
 
-const API_URL = "http://localhost:3000";
 
-const queryClient = new QueryClient();
+const API_URL = "/api";
 
-const getBadgeColor = (severity: string | null) => {
-  if (!severity) return "medium";
+
+/*
+ * Badge colors
+ */
+const getBadgeColor = (
+  severity: string | null
+) => {
+
+  if (!severity) {
+    return "medium";
+  }
 
   switch (severity.toLowerCase().trim()) {
+
     case "critical":
       return "danger";
+
     case "high":
       return "warning";
+
     case "medium":
       return "primary";
+
     case "low":
       return "success";
+
     default:
       return "medium";
   }
 };
 
-const DashboardContent: React.FC = () => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["securityDashboardData"],
+
+
+const DashboardPage: React.FC = () => {
+
+  console.log(
+    "DASHBOARD PAGE RENDERED"
+  );
+
+
+  /*
+   * Get dashboard information
+   */
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+
+    queryKey: [
+      "securityDashboardData",
+    ],
 
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/dashboard`, {
-        credentials: "include",
-      });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          window.location.href = "/login";
+      const response = await fetch(
+        `${API_URL}/dashboard`,
+        {
+          credentials: "include",
         }
+      );
 
-        throw new Error("Failed to retrieve dashboard data");
+
+      /*
+       * Session expired
+       */
+      if (response.status === 401) {
+
+        localStorage.removeItem(
+          "authenticated"
+        );
+
+        window.location.href =
+          "/login";
+
+        throw new Error(
+          "Session expired"
+        );
       }
+
+
+      /*
+       * Other backend errors
+       */
+      if (!response.ok) {
+
+        throw new Error(
+          "Failed to retrieve dashboard data"
+        );
+      }
+
 
       return response.json();
     },
@@ -89,110 +145,263 @@ const DashboardContent: React.FC = () => {
     retry: false,
   });
 
+
+
+  /*
+   * Loading
+   */
   if (isLoading) {
+
     return (
       <IonPage>
+
+        <IonHeader>
+
+          <IonToolbar>
+
+            <IonTitle>
+              Cloud Safe
+            </IonTitle>
+
+          </IonToolbar>
+
+        </IonHeader>
+
+
         <IonContent className="ion-padding">
-          <h2>Loading dashboard...</h2>
+
+          <h2>
+            Loading dashboard...
+          </h2>
+
         </IonContent>
+
       </IonPage>
     );
   }
 
+
+
+  /*
+   * Error
+   */
   if (isError) {
+
     return (
       <IonPage>
+
         <IonHeader>
+
           <IonToolbar>
-            <IonTitle>Cloud Safe</IonTitle>
+
+            <IonTitle>
+              Cloud Safe
+            </IonTitle>
+
           </IonToolbar>
+
         </IonHeader>
 
+
         <IonContent className="ion-padding">
+
           <IonCard color="danger">
+
             <IonCardHeader>
+
               <IonCardTitle>
                 Unable to load dashboard
               </IonCardTitle>
+
             </IonCardHeader>
 
+
             <IonCardContent>
-              The backend could not be reached or your session
+
+              The backend could not be
+              reached or your session
               has expired.
+
             </IonCardContent>
+
           </IonCard>
+
         </IonContent>
+
       </IonPage>
     );
   }
 
-  const alerts = data?.Recent_Alert_ || [];
-  const logs = data?.Recent_Logs || [];
-  const firstPage = data?.firstPage || [];
 
-  const activeAlerts = alerts.filter(
-    (alert: any) => alert.status === "Active"
-  );
 
-  const criticalAlerts = alerts.filter(
-    (alert: any) =>
-      alert.severity?.toLowerCase() === "critical"
-  );
+  /*
+   * Backend data
+   */
+  const alerts =
+    data?.Recent_Alert_ || [];
 
-  const chartLogs = firstPage.map((log: any) => ({
-    time: log.log_time
-      ? new Date(log.log_time).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A",
+  const logs =
+    data?.Recent_Logs || [];
 
-    logs: 1,
-  }));
+  const firstPage =
+    data?.firstPage || [];
 
-  const assetAlertMap: Record<string, number> = {};
 
-  alerts.forEach((alert: any) => {
-    if (alert.asset) {
-      assetAlertMap[alert.asset] =
-        (assetAlertMap[alert.asset] || 0) + 1;
+
+  /*
+   * Active alerts
+   */
+  const activeAlerts =
+    alerts.filter(
+      (alert: any) =>
+        alert.status === "Active"
+    );
+
+
+
+  /*
+   * Critical alerts
+   */
+  const criticalAlerts =
+    alerts.filter(
+      (alert: any) =>
+        alert.severity
+          ?.toLowerCase() ===
+        "critical"
+    );
+
+
+
+  /*
+   * Logs over time
+   */
+  const chartLogs =
+    firstPage.map((log: any) => ({
+
+      time: log.log_time
+        ? new Date(
+            log.log_time
+          ).toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )
+        : "N/A",
+
+      logs: 1,
+    }));
+
+
+
+  /*
+   * Alerts by asset
+   */
+  const assetAlertMap:
+    Record<string, number> = {};
+
+
+  alerts.forEach(
+    (alert: any) => {
+
+      if (alert.asset) {
+
+        assetAlertMap[
+          alert.asset
+        ] =
+          (
+            assetAlertMap[
+              alert.asset
+            ] || 0
+          ) + 1;
+      }
+
     }
-  });
-
-  const chartAssets = Object.keys(assetAlertMap).map(
-    (name) => ({
-      name,
-      alerts: assetAlertMap[name],
-    })
   );
 
-  const liveLogs = firstPage.map((log: any) => ({
-    severity: log.severity || "Info",
-    event: log.event || "System Event",
-    asset: log.asset || "N/A",
 
-    time: log.log_time
-      ? new Date(log.log_time).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A",
+  const chartAssets =
+    Object.keys(
+      assetAlertMap
+    ).map((name) => ({
 
-    color: getBadgeColor(log.severity),
-  }));
+      name,
+
+      alerts:
+        assetAlertMap[name],
+
+    }));
+
+
+
+  /*
+   * Recent logs
+   */
+  const liveLogs =
+    firstPage.map((log: any) => ({
+
+      severity:
+        log.severity ||
+        "Info",
+
+      event:
+        log.event ||
+        "System Event",
+
+      asset:
+        log.asset ||
+        "N/A",
+
+      time: log.log_time
+        ? new Date(
+            log.log_time
+          ).toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )
+        : "N/A",
+
+      color:
+        getBadgeColor(
+          log.severity
+        ),
+
+    }));
+
+
 
   return (
+
     <IonPage>
 
+      {/* =========================
+          HEADER
+      ========================== */}
+
       <IonHeader>
+
         <IonToolbar>
+
           <IonTitle color="primary">
             Cloud Safe
           </IonTitle>
+
         </IonToolbar>
+
       </IonHeader>
 
+
+
       <IonContent className="ion-padding">
+
+
+        {/* =========================
+            PAGE TITLE
+        ========================== */}
 
         <h1
           style={{
@@ -200,17 +409,33 @@ const DashboardContent: React.FC = () => {
             fontWeight: "bold",
           }}
         >
-          Overview of your Security Environment
+          Overview of your Security
+          Environment
         </h1>
 
-        {/* STATISTICS */}
+
+
+        {/* =========================
+            STATISTICS
+        ========================== */}
 
         <IonGrid>
+
           <IonRow>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+            {/* Assets */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardSubtitle>
                     Monitored Assets
                   </IonCardSubtitle>
@@ -218,39 +443,75 @@ const DashboardContent: React.FC = () => {
                   <IonCardTitle>
                     8
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <IonText color="success">
                     Live Network Stream
                   </IonText>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Active Alerts */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardSubtitle>
                     Active Alerts
                   </IonCardSubtitle>
 
                   <IonCardTitle>
-                    {activeAlerts.length}
+                    {
+                      activeAlerts.length
+                    }
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <IonText color="danger">
                     Check Status
                   </IonText>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Total Logs */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardSubtitle>
                     Total Logs
                   </IonCardSubtitle>
@@ -258,62 +519,112 @@ const DashboardContent: React.FC = () => {
                   <IonCardTitle>
                     {logs.length}
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <IonText color="success">
                     Indexed rows
                   </IonText>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Critical Alerts */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardSubtitle>
                     Critical Alerts
                   </IonCardSubtitle>
 
                   <IonCardTitle>
-                    {criticalAlerts.length}
+                    {
+                      criticalAlerts.length
+                    }
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <IonText color="danger">
                     Urgent items
                   </IonText>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
           </IonRow>
+
         </IonGrid>
 
-        {/* CHARTS */}
+
+
+        {/* =========================
+            CHARTS
+        ========================== */}
 
         <IonGrid>
+
           <IonRow>
 
-            <IonCol size="12" sizeMd="6">
+
+            {/* Logs chart */}
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
                     Logs Over Time
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <ResponsiveContainer
                     width="100%"
                     height={300}
                   >
-                    <AreaChart data={chartLogs}>
 
-                      <CartesianGrid strokeDasharray="3 3" />
+                    <AreaChart
+                      data={chartLogs}
+                    >
 
-                      <XAxis dataKey="time" />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
+
+                      <XAxis
+                        dataKey="time"
+                      />
 
                       <YAxis />
 
@@ -327,29 +638,53 @@ const DashboardContent: React.FC = () => {
                       />
 
                     </AreaChart>
+
                   </ResponsiveContainer>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeMd="6">
+
+
+            {/* Assets chart */}
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
                     Top Assets By Alert
                   </IonCardTitle>
+
                 </IonCardHeader>
 
+
                 <IonCardContent>
+
                   <ResponsiveContainer
                     width="100%"
                     height={300}
                   >
-                    <AreaChart data={chartAssets}>
 
-                      <CartesianGrid strokeDasharray="3 3" />
+                    <AreaChart
+                      data={chartAssets}
+                    >
 
-                      <XAxis dataKey="name" />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
+
+                      <XAxis
+                        dataKey="name"
+                      />
 
                       <YAxis />
 
@@ -363,43 +698,68 @@ const DashboardContent: React.FC = () => {
                       />
 
                     </AreaChart>
+
                   </ResponsiveContainer>
+
                 </IonCardContent>
+
               </IonCard>
+
             </IonCol>
 
           </IonRow>
+
         </IonGrid>
 
-        {/* LOGS */}
+
+
+        {/* =========================
+            RECENT LOGS
+        ========================== */}
 
         <IonGrid>
+
           <IonRow>
 
             <IonCol size="12">
 
-              <IonButton routerLink="/assets">
+
+              <IonButton
+                routerLink="/assets"
+              >
                 View all Assets
               </IonButton>
 
-              <IonButton routerLink="/logs">
+
+              <IonButton
+                routerLink="/logs"
+              >
                 View all Logs
               </IonButton>
+
 
               <IonCard>
 
                 <IonCardHeader>
+
                   <IonCardTitle>
                     Recent Logs
                   </IonCardTitle>
+
                 </IonCardHeader>
+
 
                 <IonList>
 
                   {liveLogs.map(
-                    (log: any, index: number) => (
+                    (
+                      log: any,
+                      index: number
+                    ) => (
 
-                      <IonItem key={index}>
+                      <IonItem
+                        key={index}
+                      >
 
                         <IonBadge
                           color={log.color}
@@ -408,16 +768,23 @@ const DashboardContent: React.FC = () => {
                           {log.severity}
                         </IonBadge>
 
+
                         <IonLabel>
-                          <h2>{log.event}</h2>
+
+                          <h2>
+                            {log.event}
+                          </h2>
 
                           <p>
-                            Asset: {log.asset}
+                            Asset:{" "}
+                            {log.asset}
                           </p>
 
                           <p>
-                            Time: {log.time}
+                            Time:{" "}
+                            {log.time}
                           </p>
+
                         </IonLabel>
 
                       </IonItem>
@@ -432,9 +799,14 @@ const DashboardContent: React.FC = () => {
             </IonCol>
 
           </IonRow>
+
         </IonGrid>
 
-        {/* ATTACK SIMULATOR */}
+
+
+        {/* =========================
+            ATTACK SIMULATOR
+        ========================== */}
 
         <h1
           style={{
@@ -445,71 +817,140 @@ const DashboardContent: React.FC = () => {
           Attack Simulator
         </h1>
 
+
         <IonGrid>
+
           <IonRow>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+            {/* Brute Force */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
+
                     Brute Force{" "}
-                    <IonIcon icon={lockClosed} />
+
+                    <IonIcon
+                      icon={lockClosed}
+                    />
+
                   </IonCardTitle>
+
                 </IonCardHeader>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Port Scan */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
+
                     Port Scan{" "}
-                    <IonIcon icon={globe} />
+
+                    <IonIcon
+                      icon={globe}
+                    />
+
                   </IonCardTitle>
+
                 </IonCardHeader>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Malware */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
+
                     Malware{" "}
-                    <IonIcon icon={bug} />
+
+                    <IonIcon
+                      icon={bug}
+                    />
+
                   </IonCardTitle>
+
                 </IonCardHeader>
+
               </IonCard>
+
             </IonCol>
 
-            <IonCol size="12" sizeSm="6" sizeMd="3">
+
+
+            {/* Unauthorized Access */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
               <IonCard>
+
                 <IonCardHeader>
+
                   <IonCardTitle>
+
                     Unauthorized Access{" "}
-                    <IonIcon icon={person} />
+
+                    <IonIcon
+                      icon={person}
+                    />
+
                   </IonCardTitle>
+
                 </IonCardHeader>
+
               </IonCard>
+
             </IonCol>
 
           </IonRow>
+
         </IonGrid>
 
+
       </IonContent>
+
     </IonPage>
   );
 };
 
-
-/*
- * Provider goes OUTSIDE DashboardContent.
- */
-const DashboardPage: React.FC = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <DashboardContent />
-    </QueryClientProvider>
-  );
-};
 
 export default DashboardPage;
