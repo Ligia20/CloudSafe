@@ -1,0 +1,79 @@
+/* Container & Page Base Styling */
+.theme-content {
+  --background: #061A40; /* Prussian Blue */
+  --color: #ffffff;
+}
+
+/* Header & Navigation Styling */
+.theme-header {
+  --background: #003559; /* Deep Space Blue */
+  --color: #B9D6F2;      /* Pale Sky */
+}
+
+.theme-menu-btn {
+  color: #B9D6F2;
+}
+
+.theme-title {
+  font-size: 2.5rem;
+  color: #B9D6F2;
+}
+
+/* Headings */
+.theme-heading {
+  color: #B9D6F2; /* Pale Sky */
+  font-weight: bold;
+  margin: 30px 30px 20px 0;
+}
+
+.simulator-heading {
+  margin: 40px 30px 20px 0;
+}
+
+/* Cards & Lists */
+.theme-card {
+  --background: #003559; /* Deep Space Blue */
+  color: #ffffff;
+}
+
+.theme-card-title {
+  color: #ffffff;
+}
+
+.theme-subtitle {
+  color: #B9D6F2; /* Pale Sky */
+}
+
+.chart-card {
+  margin: 0;
+  height: 100%;
+}
+
+.simulator-card {
+  border: 1px solid #0353A4; /* Sapphire border accent */
+}
+
+/* Action System Buttons */
+.action-button-row {
+  margin-top: 20px;
+}
+
+.btn-primary-theme {
+  --background: #0353A4; /* Sapphire */
+  --color: #ffffff;
+}
+
+.btn-secondary-theme {
+  --background: #006DAA; /* Cornflower Ocean */
+  --color: #ffffff;
+}
+
+/* Error Alert Banner */
+.theme-error-banner {
+  background: #721c1c; 
+  border: 1px solid #f5c6cb; 
+  color: #ffffff; 
+  padding: 12px; 
+  border-radius: 8px; 
+  margin-bottom: 16px;
+}
