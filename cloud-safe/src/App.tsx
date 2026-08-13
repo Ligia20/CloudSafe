@@ -7,7 +7,10 @@ import {
 } from "@ionic/react";
 
 import { IonReactRouter } from "@ionic/react-router";
-import { Redirect, Route } from "react-router-dom";
+import {
+  Redirect,
+  Route,
+} from "react-router-dom";
 
 import {
   QueryClient,
@@ -16,8 +19,14 @@ import {
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import DashboardPage from "./pages/DashboardPage";
+import Log from "./pages/log";
+import Assets from "./pages/Assets";
+import Page from "./pages/Page";
 
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/normalize.css";
@@ -34,33 +43,45 @@ import "@ionic/react/css/display.css";
 import "@ionic/react/css/palettes/dark.system.css";
 
 import "./theme/variables.css";
-import DashboardPage from "./pages/DashboardPage";
+
 
 setupIonicReact();
 
+
 const queryClient = new QueryClient();
 
+
 const App: React.FC = () => {
+
   return (
     <QueryClientProvider client={queryClient}>
+
       <IonApp>
+
         <IonReactRouter>
 
           <IonRouterOutlet>
 
-            {/* Root URL */}
+
+            {/* =========================
+                PUBLIC ROUTES
+            ========================== */}
+
             <Route
               exact
               path="/"
-              render={() => <Redirect to="/login" />}
+              render={() => (
+                <Redirect to="/login" />
+              )}
             />
 
-            {/* Public pages */}
+
             <Route
               exact
               path="/login"
               component={Login}
             />
+
 
             <Route
               exact
@@ -68,18 +89,60 @@ const App: React.FC = () => {
               component={Register}
             />
 
-            {/* Protected application */}
+
+            {/* =========================
+                PROTECTED APPLICATION
+            ========================== */}
+
             <ProtectedRoute
               path="/dashboard"
-              component={DashboardPage}
+              component={() => (
+                <AppLayout>
+                  <DashboardPage />
+                </AppLayout>
+              )}
             />
+
+
+            <ProtectedRoute
+              path="/logs"
+              component={() => (
+                <AppLayout>
+                  <Log />
+                </AppLayout>
+              )}
+            />
+
+
+            <ProtectedRoute
+              path="/assets"
+              component={() => (
+                <AppLayout>
+                  <Assets />
+                </AppLayout>
+              )}
+            />
+
+
+            <ProtectedRoute
+              path="/page"
+              component={() => (
+                <AppLayout>
+                  <Page />
+                </AppLayout>
+              )}
+            />
+
 
           </IonRouterOutlet>
 
         </IonReactRouter>
+
       </IonApp>
+
     </QueryClientProvider>
   );
 };
+
 
 export default App;

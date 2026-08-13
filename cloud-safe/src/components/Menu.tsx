@@ -1,156 +1,172 @@
+import React from "react";
+
 import {
+  IonMenu,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
   IonContent,
-  IonIcon,
+  IonList,
   IonItem,
   IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonButton,
+  IonIcon,
 } from "@ionic/react";
 
 import {
-  archiveOutline,
-  archiveSharp,
-  bookmarkOutline,
-  heartOutline,
-  heartSharp,
-  mailOutline,
-  mailSharp,
-  paperPlaneOutline,
-  paperPlaneSharp,
-  trashOutline,
-  trashSharp,
-  warningOutline,
-  warningSharp,
-  logOutOutline,
+  home,
+  list,
+  server,
+  document,
+  logOut,
 } from "ionicons/icons";
 
-import { useLocation, useHistory } from "react-router-dom";
-
-import "./Menu.css";
-
-interface AppPage {
-  url: string;
-  iosIcon: string;
-  mdIcon: string;
-  title: string;
-}
-
-const appPages: AppPage[] = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    iosIcon: mailOutline,
-    mdIcon: mailSharp,
-  },
-  {
-    title: "Assets",
-    url: "/assets",
-    iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp,
-  },
-  {
-    title: "Log",
-    url: "/logs",
-    iosIcon: heartOutline,
-    mdIcon: heartSharp,
-  },
-];
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useHistory } from "react-router-dom";
 
 const Menu: React.FC = () => {
-  const location = useLocation();
   const history = useHistory();
 
   const handleLogout = async () => {
+    console.log("LOGOUT CLICKED");
+
     try {
-      const response = await fetch(`${API_URL}/logout`, {
+      // Tell backend to destroy the session/cookie
+      const response = await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
       });
 
+      console.log(
+        "LOGOUT RESPONSE:",
+        response.status
+      );
+
       if (!response.ok) {
-        console.error("Logout failed");
-        return;
+        console.error(
+          "Backend logout failed:",
+          response.status
+        );
       }
 
-      // Remove frontend authentication state
-      localStorage.removeItem("authenticated");
-      // Send user back to login
-      history.push("/login");
-
     } catch (error) {
-      console.error("LOGOUT ERROR:", error);
+      console.error(
+        "LOGOUT ERROR:",
+        error
+      );
+
+    } finally {
+
+      // Always clear frontend authentication
+      localStorage.removeItem("authenticated");
+
+      console.log(
+        "AUTH AFTER LOGOUT:",
+        localStorage.getItem("authenticated")
+      );
+
+      // Return to login
+      history.replace("/login");
     }
   };
 
   return (
     <IonMenu contentId="main">
 
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>
+            CloudSafe
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
+
       <IonContent>
 
-        <IonList id="inbox-list">
-
-          <IonListHeader>
-            Cloud Safe
-          </IonListHeader>
-
-          <IonNote>
-            hi@ionicframework.com
-          </IonNote>
-
-          {appPages.map((appPage, index) => (
-            <IonMenuToggle key={appPage.title} autoHide={false}>
-
-              <IonItem
-                className={
-                  location.pathname === appPage.url
-                    ? "selected"
-                    : ""
-                }
-                routerLink={appPage.url}
-                routerDirection="none"
-                lines="none"
-                detail={false}
-              >
-                <IonIcon
-                  slot="start"
-                  ios={appPage.iosIcon}
-                  md={appPage.mdIcon}
-                />
-
-                <IonLabel>
-                  {appPage.title}
-                </IonLabel>
-              </IonItem>
-
-            </IonMenuToggle>
-          ))}
-
-        </IonList>
-
-        {/* Logout */}
         <IonList>
-          <IonMenuToggle autoHide={false}>
-            <IonItem
-              button
-              lines="none"
-              onClick={handleLogout}
-            >
-              <IonIcon
-                slot="start"
-                icon={logOutOutline}
-              />
 
-              <IonLabel>
-                Logout
-              </IonLabel>
-            </IonItem>
-          </IonMenuToggle>
+          {/* Dashboard */}
+
+          <IonItem
+            button
+            routerLink="/dashboard"
+          >
+            <IonIcon
+              icon={home}
+              slot="start"
+            />
+
+            <IonLabel>
+              Dashboard
+            </IonLabel>
+          </IonItem>
+
+
+          {/* Logs */}
+
+          <IonItem
+            button
+            routerLink="/logs"
+          >
+            <IonIcon
+              icon={list}
+              slot="start"
+            />
+
+            <IonLabel>
+              Logs
+            </IonLabel>
+          </IonItem>
+
+
+          {/* Assets */}
+
+          <IonItem
+            button
+            routerLink="/assets"
+          >
+            <IonIcon
+              icon={server}
+              slot="start"
+            />
+
+            <IonLabel>
+              Assets
+            </IonLabel>
+          </IonItem>
+
+
+          {/* Page */}
+
+          <IonItem
+            button
+            routerLink="/page"
+          >
+            <IonIcon
+              icon={document}
+              slot="start"
+            />
+
+            <IonLabel>
+              Page
+            </IonLabel>
+          </IonItem>
+
+
+          {/* Logout */}
+
+          <IonItem
+            button
+            onClick={handleLogout}
+          >
+            <IonIcon
+              icon={logOut}
+              slot="start"
+            />
+
+            <IonLabel>
+              Logout
+            </IonLabel>
+          </IonItem>
+
         </IonList>
 
       </IonContent>

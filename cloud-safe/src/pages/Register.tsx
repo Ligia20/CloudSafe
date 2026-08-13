@@ -14,7 +14,7 @@ import {
 
 import { useHistory } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "/api";
 
 const Register: React.FC = () => {
 
@@ -24,7 +24,9 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleRegister = async (event: React.FormEvent) => {
+  const handleRegister = async (
+    event: React.FormEvent
+  ) => {
 
     event.preventDefault();
 
@@ -32,38 +34,58 @@ const Register: React.FC = () => {
 
     try {
 
-      const response = await fetch(`${API_URL}/register`, {
-        method: "POST",
+      const response = await fetch(
+        `${API_URL}/register`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        credentials: "include",
+          credentials: "include",
 
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Registration failed");
+
+        setError(
+          data.error ||
+          "Registration failed"
+        );
+
         return;
       }
 
-      console.log("Registration successful");
+      console.log(
+        "Registration successful"
+      );
 
-      // Send user to login
-      history.push("/login");
+      /*
+       * Registration does not automatically
+       * authenticate the user.
+       *
+       * Send them to login.
+       */
+      history.replace("/login");
 
     } catch (error) {
 
-      console.error("REGISTER ERROR:", error);
+      console.error(
+        "REGISTER ERROR:",
+        error
+      );
 
-      setError("Unable to connect to server");
+      setError(
+        "Unable to connect to server"
+      );
     }
   };
 
@@ -71,9 +93,15 @@ const Register: React.FC = () => {
     <IonPage>
 
       <IonHeader>
+
         <IonToolbar>
-          <IonTitle>Create Account</IonTitle>
+
+          <IonTitle>
+            Create Account
+          </IonTitle>
+
         </IonToolbar>
+
       </IonHeader>
 
       <IonContent className="ion-padding">
@@ -81,26 +109,34 @@ const Register: React.FC = () => {
         <form onSubmit={handleRegister}>
 
           <IonItem>
+
             <IonInput
               label="Username"
               labelPlacement="floating"
               value={username}
               onIonInput={(e) =>
-                setUsername(e.detail.value ?? "")
+                setUsername(
+                  e.detail.value ?? ""
+                )
               }
             />
+
           </IonItem>
 
           <IonItem>
+
             <IonInput
               type="password"
               label="Password"
               labelPlacement="floating"
               value={password}
               onIonInput={(e) =>
-                setPassword(e.detail.value ?? "")
+                setPassword(
+                  e.detail.value ?? ""
+                )
               }
             />
+
           </IonItem>
 
           {error && (
@@ -121,7 +157,9 @@ const Register: React.FC = () => {
         <IonButton
           fill="clear"
           expand="block"
-          onClick={() => history.push("/login")}
+          onClick={() =>
+            history.push("/login")
+          }
         >
           Already have an account? Login
         </IonButton>
