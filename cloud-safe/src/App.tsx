@@ -1,68 +1,84 @@
-import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route } from 'react-router-dom';
-import Menu from './components/Menu';
-import Page from './pages/Page';
-import Log from './pages/log';
-import DashboardPage from './pages/DashboardPage';
-import Assets from './pages/Assets';
+import React from "react";
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
+import {
+  IonApp,
+  IonRouterOutlet,
+  setupIonicReact,
+} from "@ionic/react";
 
-/* Basic CSS for apps built with Ionic */
+import { IonReactRouter } from "@ionic/react-router";
+import { Redirect, Route } from "react-router-dom";
 
-import '@ionic/react/css/normalize.css';
-import '@ionic/react/css/structure.css';
-import '@ionic/react/css/typography.css';
+import {
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
-/* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AppLayout from "./components/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+import "@ionic/react/css/core.css";
+import "@ionic/react/css/normalize.css";
+import "@ionic/react/css/structure.css";
+import "@ionic/react/css/typography.css";
 
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
+import "@ionic/react/css/padding.css";
+import "@ionic/react/css/float-elements.css";
+import "@ionic/react/css/text-alignment.css";
+import "@ionic/react/css/text-transformation.css";
+import "@ionic/react/css/flex-utils.css";
+import "@ionic/react/css/display.css";
 
-/* Theme variables */
-import './theme/variables.css';
+import "@ionic/react/css/palettes/dark.system.css";
+
+import "./theme/variables.css";
+import DashboardPage from "./pages/DashboardPage";
 
 setupIonicReact();
 
+const queryClient = new QueryClient();
+
 const App: React.FC = () => {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonSplitPane contentId="main">
-          <Menu />
-          <IonRouterOutlet id="main">
-            <Route path="/" exact={true}>
-              <Redirect to="/folder/Inbox" />
-            </Route>
-            <Route path="/Assets" exact={true}>
-              <Assets />
-            </Route>
-            <Route path="/log" exact={true}>
-              <Log />
-            </Route>
-            <Route path="/Dashboard" exact={true}>
-              <DashboardPage />
-            </Route>
+    <QueryClientProvider client={queryClient}>
+      <IonApp>
+        <IonReactRouter>
+
+          <IonRouterOutlet>
+
+            {/* Root URL */}
+            <Route
+              exact
+              path="/"
+              render={() => <Redirect to="/login" />}
+            />
+
+            {/* Public pages */}
+            <Route
+              exact
+              path="/login"
+              component={Login}
+            />
+
+            <Route
+              exact
+              path="/register"
+              component={Register}
+            />
+
+            {/* Protected application */}
+            <ProtectedRoute
+              path="/dashboard"
+              component={DashboardPage}
+            />
+
           </IonRouterOutlet>
-        </IonSplitPane>
-      </IonReactRouter>
-    </IonApp>
+
+        </IonReactRouter>
+      </IonApp>
+    </QueryClientProvider>
   );
 };
 
