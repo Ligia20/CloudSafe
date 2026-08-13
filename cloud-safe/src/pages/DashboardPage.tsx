@@ -186,7 +186,7 @@ const DashboardContent = () => {
                         <h2 style={{ fontWeight: '600' }}>{alert.name}</h2> 
                         <p>Asset: {alert.asset} | Time: {alert.time}</p> 
                       </IonLabel> 
-                      <IonBadge color="light" slot="end" style={{ color: '#333' }}>{alert.status}</IonBadge> 
+                      <IonBadge color="light" slot="end" style={{ color: '#8c9fe4' }}>{alert.status}</IonBadge> 
                     </IonItem> 
                   ))} 
                 </IonList> 
@@ -281,7 +281,7 @@ const DashboardContent = () => {
 
                 {/* 4. Network Source IP Address Codeblock Column */}
                 <IonCol size="2.5">
-                  <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                  <code style={{ background: 'rgba(142, 166, 227, 0.05)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
                     {log.ip}
                   </code>
                 </IonCol>
