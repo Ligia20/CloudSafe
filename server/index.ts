@@ -4,7 +4,6 @@ import express, {Request, Response, NextFunction, response} from "express";
 import cors from "cors";
 import session from "express-session";
 import bcrypt from "bcrypt";
-import ngrok from "@ngrok/ngrok";
 
 const PORT = 3000;
 const app = express();
@@ -12,7 +11,6 @@ const app = express();
 app.use(cors(
     {
         origin: [
-            "http://localhost:5173",
             "https://moaner-slinging-culinary.ngrok-free.dev"
         ],
         credentials: true,
@@ -390,17 +388,6 @@ app.get("/auth/whoamI", requireAuth, async (req, res) => {
   });
 });
 
-app.listen(PORT, async () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Listening on http://localhost:${PORT}`);
-
-  try {
-    const listener = await ngrok.connect({
-      addr: PORT,
-      authtoken: process.env.NGROK_AUTH_TOKEN,
-    });
-
-    console.log(`ngrok: ${listener.url()}`);
-  } catch (error) {
-    console.error("NGROK ERROR:", error);
-  }
 });
