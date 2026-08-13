@@ -15,8 +15,20 @@ export default defineConfig({
   },
 
   server: {
-    host: "0.0.0.0",
-    port: 5173,
-    allowedHosts: true
+  host: "0.0.0.0",
+  port: 5173,
+
+  allowedHosts: [
+    "moaner-slinging-culinary.ngrok-free.dev",
+  ],
+
+  proxy: {
+    "/api": {
+      target: "http://localhost:3000",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/api/, ""),
+    },
   },
+},
 });

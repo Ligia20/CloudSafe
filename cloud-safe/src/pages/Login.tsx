@@ -11,7 +11,7 @@ import {
   IonItem,
 } from "@ionic/react";
 
-const API_URL = "https://BACKEND.ngrok-free.dev";
+const API_URL = "/api";
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -22,6 +22,12 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     setError("");
+
+    // Basic validation
+    if (!username || !password) {
+      setError("Username and password are required");
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/login`, {
@@ -38,15 +44,22 @@ const Login: React.FC = () => {
 
       const data = await response.json();
 
+      // Incorrect username/password
+      if (response.status === 401) {
+        setError("Username and/or password is not correct");
+        return;
+      }
+
+      // Other backend errors
       if (!response.ok) {
         setError(data.error || "Login failed");
         return;
       }
 
-      // Login succeeded
+      // Login successful
       localStorage.setItem("authenticated", "true");
 
-      // Go to dashboard
+      // Redirect to dashboard
       history.push("/dashboard");
 
     } catch (error) {
@@ -69,7 +82,9 @@ const Login: React.FC = () => {
           <IonInput
             label="Username"
             value={username}
-            onIonInput={(e) => setUsername(e.detail.value ?? "")}
+            onIonInput={(e) =>
+              setUsername(e.detail.value ?? "")
+            }
           />
         </IonItem>
 
@@ -78,7 +93,9 @@ const Login: React.FC = () => {
             label="Password"
             type="password"
             value={password}
-            onIonInput={(e) => setPassword(e.detail.value ?? "")}
+            onIonInput={(e) =>
+              setPassword(e.detail.value ?? "")
+            }
           />
         </IonItem>
 
