@@ -223,6 +223,145 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ngrok/ngrok-android-arm64@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-android-arm64@npm:1.7.0"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-arm64@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-darwin-arm64@npm:1.7.0"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-universal@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-darwin-universal@npm:1.7.0"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-darwin-x64@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-darwin-x64@npm:1.7.0"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-freebsd-x64@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-freebsd-x64@npm:1.7.0"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm-gnueabihf@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-linux-arm-gnueabihf@npm:1.7.0"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm64-gnu@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-linux-arm64-gnu@npm:1.7.0"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-arm64-musl@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-linux-arm64-musl@npm:1.7.0"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-x64-gnu@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-linux-x64-gnu@npm:1.7.0"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-linux-x64-musl@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-linux-x64-musl@npm:1.7.0"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-win32-arm64-msvc@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-win32-arm64-msvc@npm:1.7.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-win32-ia32-msvc@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-win32-ia32-msvc@npm:1.7.0"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok-win32-x64-msvc@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok-win32-x64-msvc@npm:1.7.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@ngrok/ngrok@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@ngrok/ngrok@npm:1.7.0"
+  dependencies:
+    "@ngrok/ngrok-android-arm64": "npm:1.7.0"
+    "@ngrok/ngrok-darwin-arm64": "npm:1.7.0"
+    "@ngrok/ngrok-darwin-universal": "npm:1.7.0"
+    "@ngrok/ngrok-darwin-x64": "npm:1.7.0"
+    "@ngrok/ngrok-freebsd-x64": "npm:1.7.0"
+    "@ngrok/ngrok-linux-arm-gnueabihf": "npm:1.7.0"
+    "@ngrok/ngrok-linux-arm64-gnu": "npm:1.7.0"
+    "@ngrok/ngrok-linux-arm64-musl": "npm:1.7.0"
+    "@ngrok/ngrok-linux-x64-gnu": "npm:1.7.0"
+    "@ngrok/ngrok-linux-x64-musl": "npm:1.7.0"
+    "@ngrok/ngrok-win32-arm64-msvc": "npm:1.7.0"
+    "@ngrok/ngrok-win32-ia32-msvc": "npm:1.7.0"
+    "@ngrok/ngrok-win32-x64-msvc": "npm:1.7.0"
+  dependenciesMeta:
+    "@ngrok/ngrok-android-arm64":
+      optional: true
+    "@ngrok/ngrok-darwin-arm64":
+      optional: true
+    "@ngrok/ngrok-darwin-universal":
+      optional: true
+    "@ngrok/ngrok-darwin-x64":
+      optional: true
+    "@ngrok/ngrok-freebsd-x64":
+      optional: true
+    "@ngrok/ngrok-linux-arm-gnueabihf":
+      optional: true
+    "@ngrok/ngrok-linux-arm64-gnu":
+      optional: true
+    "@ngrok/ngrok-linux-arm64-musl":
+      optional: true
+    "@ngrok/ngrok-linux-x64-gnu":
+      optional: true
+    "@ngrok/ngrok-linux-x64-musl":
+      optional: true
+    "@ngrok/ngrok-win32-arm64-msvc":
+      optional: true
+    "@ngrok/ngrok-win32-ia32-msvc":
+      optional: true
+    "@ngrok/ngrok-win32-x64-msvc":
+      optional: true
+  checksum: 10c0/67ad258efd5797bb1bcbe75344d6fa930eab69ac7c6d72c4d9ed1e507c2e2953f5e856d803d23eeec22227adeb66f959982709dc0c73d3cb76630ac450980a06
+  languageName: node
+  linkType: hard
+
 "@prisma/adapter-pg@npm:^7.9.1":
   version: 7.9.1
   resolution: "@prisma/adapter-pg@npm:7.9.1"
@@ -533,6 +672,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bcrypt@npm:^6":
+  version: 6.0.0
+  resolution: "@types/bcrypt@npm:6.0.0"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/48b66408838f5eb59791da5a77260cef59a5291ce0945f2caa3b5a6158c44b321b684b4aa7dce771852c63271c766cadd587374273451b300377a17015c1d51d
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.6
   resolution: "@types/body-parser@npm:1.19.6"
@@ -672,7 +820,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^5":
+"@types/express-session@npm:^1":
+  version: 1.19.0
+  resolution: "@types/express-session@npm:1.19.0"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: 10c0/523035f476c84623d6ee4ec81452066d0112f66a41ba9488003c8898f26c85c46951e093bb1cb81447571a467b4a7bba87bd52c08e519a2af254c9de48a25d5f
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:*, @types/express@npm:^5":
   version: 5.0.6
   resolution: "@types/express@npm:5.0.6"
   dependencies:
@@ -942,6 +1099,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bcrypt@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "bcrypt@npm:6.0.0"
+  dependencies:
+    node-addon-api: "npm:^8.3.0"
+    node-gyp: "npm:latest"
+    node-gyp-build: "npm:^4.8.4"
+  checksum: 10c0/006e69d4b3f0f021051fa9d998a768721a51dde28e7848e3e775ab608ba3476b25fa9262a7082ececbb0d493b0b6ca83673a6f3810b114fe90ec1bc6ae4b35b2
+  languageName: node
+  linkType: hard
+
 "better-result@npm:^2.7.0":
   version: 2.10.0
   resolution: "better-result@npm:2.10.0"
@@ -1076,7 +1244,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie@npm:^0.7.1":
+"cookie-signature@npm:~1.0.7":
+  version: 1.0.7
+  resolution: "cookie-signature@npm:1.0.7"
+  checksum: 10c0/e7731ad2995ae2efeed6435ec1e22cdd21afef29d300c27281438b1eab2bae04ef0d1a203928c0afec2cee72aa36540b8747406ebe308ad23c8e8cc3c26c9c51
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^0.7.1, cookie@npm:~0.7.2":
   version: 0.7.2
   resolution: "cookie@npm:0.7.2"
   checksum: 10c0/9596e8ccdbf1a3a88ae02cf5ee80c1c50959423e1022e4e60b91dd87c622af1da309253d8abdb258fb5e3eacb4f08e579dc58b4897b8087574eee0fd35dfa5d2
@@ -1233,6 +1408,15 @@ __metadata:
     supports-color:
       optional: true
   checksum: 10c0/d79136ec6c83ecbefd0f6a5593da6a9c91ec4d7ddc4b54c883d6e71ec9accb5f67a1a5e96d00a328196b5b5c86d365e98d8a3a70856aaf16b4e7b1985e67f5a6
+  languageName: node
+  linkType: hard
+
+"debug@npm:~2.6.9":
+  version: 2.6.9
+  resolution: "debug@npm:2.6.9"
+  dependencies:
+    ms: "npm:2.0.0"
+  checksum: 10c0/121908fb839f7801180b69a7e218a40b5a0b718813b886b7d6bdb82001b931c938e2941d1e4450f33a1b1df1da653f5f7a0440c197f29fbf8a6e9d45ff6ef589
   languageName: node
   linkType: hard
 
@@ -1480,6 +1664,22 @@ __metadata:
   version: 3.1.3
   resolution: "exponential-backoff@npm:3.1.3"
   checksum: 10c0/77e3ae682b7b1f4972f563c6dbcd2b0d54ac679e62d5d32f3e5085feba20483cf28bd505543f520e287a56d4d55a28d7874299941faf637e779a1aa5994d1267
+  languageName: node
+  linkType: hard
+
+"express-session@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "express-session@npm:1.19.0"
+  dependencies:
+    cookie: "npm:~0.7.2"
+    cookie-signature: "npm:~1.0.7"
+    debug: "npm:~2.6.9"
+    depd: "npm:~2.0.0"
+    on-headers: "npm:~1.1.0"
+    parseurl: "npm:~1.3.3"
+    safe-buffer: "npm:~5.2.1"
+    uid-safe: "npm:~2.1.5"
+  checksum: 10c0/b1766010a728c58ca1b93ea33d49008b0b16a8751e5767d36b5bf3dd2f7f77d9933bb55352d296edbad4824c8c65e33554f058a33f201406557c1b3615fd10dc
   languageName: node
   linkType: hard
 
@@ -1920,6 +2120,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ms@npm:2.0.0":
+  version: 2.0.0
+  resolution: "ms@npm:2.0.0"
+  checksum: 10c0/f8fda810b39fd7255bbdc451c46286e549794fcc700dc9cd1d25658bbc4dc2563a5de6fe7c60f798a16a60c6ceb53f033cb353f493f0cf63e5199b702943159d
+  languageName: node
+  linkType: hard
+
 "ms@npm:^2.1.3":
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
@@ -1957,6 +2164,26 @@ __metadata:
   version: 1.0.0
   resolution: "negotiator@npm:1.0.0"
   checksum: 10c0/4c559dd52669ea48e1914f9d634227c561221dd54734070791f999c52ed0ff36e437b2e07d5c1f6e32909fc625fe46491c16e4a8f0572567d4dd15c3a4fda04b
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^8.3.0":
+  version: 8.9.1
+  resolution: "node-addon-api@npm:8.9.1"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: 10c0/189160497de690479030b7b2f5641c38ffab8601c2ada6fcb8fe3718baf14af51d651528a49ec58de5dd602ff7858459d13facb71914669106f2c6cc6d9d50a5
+  languageName: node
+  linkType: hard
+
+"node-gyp-build@npm:^4.8.4":
+  version: 4.8.4
+  resolution: "node-gyp-build@npm:4.8.4"
+  bin:
+    node-gyp-build: bin.js
+    node-gyp-build-optional: optional.js
+    node-gyp-build-test: build-test.js
+  checksum: 10c0/444e189907ece2081fe60e75368784f7782cfddb554b60123743dfb89509df89f1f29c03bbfa16b3a3e0be3f48799a4783f487da6203245fa5bed239ba7407e1
   languageName: node
   linkType: hard
 
@@ -2021,6 +2248,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"on-headers@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "on-headers@npm:1.1.0"
+  checksum: 10c0/2c3b6b0d68ec9adbd561dc2d61c9b14da8ac03d8a2f0fd9e97bdf0600c887d5d97f664ff3be6876cf40cda6e3c587d73a4745e10b426ac50c7664fc5a0dfc0a1
+  languageName: node
+  linkType: hard
+
 "once@npm:^1.4.0":
   version: 1.4.0
   resolution: "once@npm:1.4.0"
@@ -2030,7 +2264,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parseurl@npm:^1.3.3":
+"parseurl@npm:^1.3.3, parseurl@npm:~1.3.3":
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3"
   checksum: 10c0/90dd4760d6f6174adb9f20cf0965ae12e23879b5f5464f38e92fce8073354341e4b3b76fa3d878351efe7d01e617121955284cfd002ab087fba1a0726ec0b4f5
@@ -2277,6 +2511,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"random-bytes@npm:~1.0.0":
+  version: 1.0.0
+  resolution: "random-bytes@npm:1.0.0"
+  checksum: 10c0/71e7a600e0976e9ebc269793a0577d47b965fa678fcc9e9623e427f909d1b3669db5b3a178dbf61229f0724ea23dba64db389f0be0ba675c6a6b837c02f29b8f
+  languageName: node
+  linkType: hard
+
 "range-parser@npm:^1.2.1":
   version: 1.3.0
   resolution: "range-parser@npm:1.3.0"
@@ -2361,6 +2602,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"safe-buffer@npm:~5.2.1":
+  version: 5.2.1
+  resolution: "safe-buffer@npm:5.2.1"
+  checksum: 10c0/6501914237c0a86e9675d4e51d89ca3c21ffd6a31642efeba25ad65720bce6921c9e7e974e5be91a786b25aa058b5303285d3c15dbabf983a919f5f630d349f3
+  languageName: node
+  linkType: hard
+
 "safe-regex2@npm:^5.0.0":
   version: 5.1.1
   resolution: "safe-regex2@npm:5.1.1"
@@ -2430,15 +2678,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "server@workspace:."
   dependencies:
+    "@ngrok/ngrok": "npm:^1.7.0"
     "@prisma/adapter-pg": "npm:^7.9.1"
     "@prisma/client": "npm:^7.9.1"
+    "@types/bcrypt": "npm:^6"
     "@types/cors": "npm:^2"
     "@types/express": "npm:^5"
+    "@types/express-session": "npm:^1"
     "@types/node": "npm:^26.2.0"
     "@types/pg": "npm:^8.21.0"
+    bcrypt: "npm:^6.0.0"
     cors: "npm:^2.8.6"
     dotenv: "npm:^17.4.2"
     express: "npm:^5.2.1"
+    express-session: "npm:^1.19.0"
     pg: "npm:^8.23.0"
     prisma: "npm:^7.9.1"
     tsx: "npm:^4.23.12"
@@ -2632,6 +2885,15 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/2f25c74e65663c248fa1ade2b8459d9ce5372ff9dad07067310f132966ebec1d93f6c42f0baf77a6b6a7a91460463f708e6887013aaade22111037457c6b25df
+  languageName: node
+  linkType: hard
+
+"uid-safe@npm:~2.1.5":
+  version: 2.1.5
+  resolution: "uid-safe@npm:2.1.5"
+  dependencies:
+    random-bytes: "npm:~1.0.0"
+  checksum: 10c0/ec96862e859fd12175f3da7fda9d1359a2cf412fd521e10837cbdc6d554774079ce252f366981df9401283841c8924782f6dbee8f82a3a81f805ed8a8584595d
   languageName: node
   linkType: hard
 
