@@ -8,11 +8,29 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
-} from '@ionic/react';
-import {cloud} from 'ionicons/icons';
-import { useLocation } from 'react-router-dom';
-import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
-import './Menu.css';
+  IonButton,
+} from "@ionic/react";
+
+import {
+  archiveOutline,
+  archiveSharp,
+  bookmarkOutline,
+  heartOutline,
+  heartSharp,
+  mailOutline,
+  mailSharp,
+  paperPlaneOutline,
+  paperPlaneSharp,
+  trashOutline,
+  trashSharp,
+  warningOutline,
+  warningSharp,
+  logOutOutline,
+} from "ionicons/icons";
+
+import { useLocation, useHistory } from "react-router-dom";
+
+import "./Menu.css";
 
 interface AppPage {
   url: string;
@@ -23,51 +41,120 @@ interface AppPage {
 
 const appPages: AppPage[] = [
   {
-    title: 'Dashboard',
-    url: '/Dashboard',
+    title: "Dashboard",
+    url: "/dashboard",
     iosIcon: mailOutline,
-    mdIcon: mailSharp
+    mdIcon: mailSharp,
   },
   {
-    title: 'Assets',
-    url: '/Assets',
+    title: "Assets",
+    url: "/assets",
     iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp
+    mdIcon: paperPlaneSharp,
   },
   {
-    title: 'Log',
-    url: '/Log',
+    title: "Log",
+    url: "/logs",
     iosIcon: heartOutline,
-    mdIcon: heartSharp
+    mdIcon: heartSharp,
   },
- 
 ];
 
-const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Menu: React.FC = () => {
   const location = useLocation();
+  const history = useHistory();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.error("Logout failed");
+        return;
+      }
+
+      // Remove frontend authentication state
+      localStorage.removeItem("authenticated");
+      // Send user back to login
+      history.push("/login");
+
+    } catch (error) {
+      console.error("LOGOUT ERROR:", error);
+    }
+  };
 
   return (
-    <IonMenu contentId="main" type="overlay">
+    <IonMenu contentId="main">
+
       <IonContent>
+
         <IonList id="inbox-list">
-          <IonListHeader>Cloud Safe
-            <IonIcon slot="end" icon={cloud}></IonIcon>
+
+          <IonListHeader>
+            Cloud Safe
           </IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
-          {appPages.map((appPage, index) => {
-            return (
-              <IonMenuToggle key={index} autoHide={false}>
-                <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
-                  <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
-                  <IonLabel>{appPage.title}</IonLabel>
-                </IonItem>
-              </IonMenuToggle>
-            );
-          })}
+
+          <IonNote>
+            hi@ionicframework.com
+          </IonNote>
+
+          {appPages.map((appPage, index) => (
+            <IonMenuToggle key={appPage.title} autoHide={false}>
+
+              <IonItem
+                className={
+                  location.pathname === appPage.url
+                    ? "selected"
+                    : ""
+                }
+                routerLink={appPage.url}
+                routerDirection="none"
+                lines="none"
+                detail={false}
+              >
+                <IonIcon
+                  slot="start"
+                  ios={appPage.iosIcon}
+                  md={appPage.mdIcon}
+                />
+
+                <IonLabel>
+                  {appPage.title}
+                </IonLabel>
+              </IonItem>
+
+            </IonMenuToggle>
+          ))}
+
         </IonList>
+
+        {/* Logout */}
+        <IonList>
+          <IonMenuToggle autoHide={false}>
+            <IonItem
+              button
+              lines="none"
+              onClick={handleLogout}
+            >
+              <IonIcon
+                slot="start"
+                icon={logOutOutline}
+              />
+
+              <IonLabel>
+                Logout
+              </IonLabel>
+            </IonItem>
+          </IonMenuToggle>
+        </IonList>
+
       </IonContent>
+
     </IonMenu>
   );
 };
