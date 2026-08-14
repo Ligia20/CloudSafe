@@ -1,4 +1,6 @@
 .log-page{
+    background-color: #061A40;
+    font-color: #b9d6f2;
 
 }
 .title{
@@ -6,11 +8,11 @@
 }
 
 .title-content{
-display:flex;
-align-items: center;
-justify-content: center;
-margin-top: 20px;
-margin-bottom: 20px;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
 
 }
 
