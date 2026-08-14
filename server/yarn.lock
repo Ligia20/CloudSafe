@@ -820,7 +820,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-session@npm:^1":
+"@types/express-session@npm:^1.19.0":
   version: 1.19.0
   resolution: "@types/express-session@npm:1.19.0"
   dependencies:
@@ -2684,7 +2684,7 @@ __metadata:
     "@types/bcrypt": "npm:^6"
     "@types/cors": "npm:^2"
     "@types/express": "npm:^5"
-    "@types/express-session": "npm:^1"
+    "@types/express-session": "npm:^1.19.0"
     "@types/node": "npm:^26.2.0"
     "@types/pg": "npm:^8.21.0"
     bcrypt: "npm:^6.0.0"
