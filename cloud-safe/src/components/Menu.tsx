@@ -43,25 +43,24 @@ const appPages: AppPage[] = [
  
 ];
 
-const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 
 const Menu: React.FC = () => {
   const location = useLocation();
 
   return (
     <IonMenu contentId="main" type="overlay">
-      <IonContent>
-        <IonList id="inbox-list">
-          <IonListHeader>Cloud Safe
+      <IonContent className="menu">
+        <IonList className="tabs" id="inbox-list"  >
+          <IonListHeader className="theme">Cloud Safe
             <IonIcon slot="end" icon={cloud}></IonIcon>
           </IonListHeader>
           <IonNote>hi@ionicframework.com</IonNote>
           {appPages.map((appPage, index) => {
             return (
-              <IonMenuToggle key={index} autoHide={false}>
-                <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
+              <IonMenuToggle  key={index} autoHide={false}>
+                <IonItem className= {`menu theme ${location.pathname === appPage.url ? 'selected' : ''}`} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
                   <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
-                  <IonLabel>{appPage.title}</IonLabel>
+                  <IonLabel  >{appPage.title}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             );
