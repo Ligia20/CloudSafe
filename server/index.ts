@@ -1,66 +1,240 @@
 import "dotenv/config";
 import { prisma } from "./lib/prisma";
-import express from "express";
+import express, {Request, Response, NextFunction, response} from "express";
 import cors from "cors";
+import session from "express-session";
+import bcrypt from "bcrypt";
 
 const PORT = 3000;
 const app = express();
-app.use(cors());
+
+app.use(cors(
+    {
+        origin: [
+            "https://moaner-slinging-culinary.ngrok-free.dev"
+        ],
+        credentials: true,
+    }
+));
 app.use(express.json());
-app.use(express.json());
+app.set("trust proxy", 1);
+const isProduction = process.env.NODE_ENV === "production";
+app.use(
+  session({
+    name: "cloudsafe-session",
+    secret: process.env.SESSION_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 1000 * 60 * 60,
+    },
+  })
+);
 
-app.get("/dashboard", async (req, res) => {
-  const Recent_Alert_ = await prisma.recent_Alert_.findMany({
-    orderBy: [
-      { severity: "desc" },
-    ],
+function requireAuth(req: Request, res: Response, next: NextFunction) 
+{
+    if (!req.session.userId) 
+    {
+        return res.status(401).json(
+            {
+                error: "Authentication required",
+            }
+        );
+    }
+    next();
+}
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "CloudSafe API is running",
   });
-
-  const firstPage = await prisma.recent_Logs.findMany({
-    take: 10,
-    orderBy: [
-      { log_id: "asc" },
-      { asset: "asc" },
-      { source_ip: "asc" },
-      { event: "desc" },
-    ],
-  });
- 
-  const lastPage = firstPage[firstPage.length - 1];
-
-  const nextPage = lastPage ? await prisma.recent_Logs.findMany({
-        take: 10,
-        skip: 1,
-        cursor: { log_id: lastPage.log_id },
-        orderBy:{
-            log_id: "asc",
-            asset: "asc",
-            source_ip: "asc",
-        }
-  }) : [];
-
-  const Recent_Logs = await prisma.recent_Logs.findMany({
-    orderBy: [
-      { severity: "desc" },
-      { log_time: "desc" },
-    ],
-  });
-
-  res.json({ Recent_Alert_, Recent_Logs, firstPage, lastPage, nextPage });
-  res.status(200).json({ message: "Dashboard data retrieved successfully" });
 });
 
-app.get("/logs", async (req, res) => {
+app.post("/register", async (req,res) =>{
+    try{
+        const {username, password} = req.body;
+        if (!username || !password)
+        {
+            return res.status(400).json({
+                error: "Username and password required",
+            });
+        }
+        const passwordHash = await bcrypt.hash(password, 12);
+        const user = await prisma.user.create({
+            data: {
+                username: username,
+                password: passwordHash,
+            },
+        });
+        res.status(201).json({
+            message: "User registered successfully",
+            user: {
+                userId: user.id,
+                username: user.username,
+            },
+        });
+    }   catch(error){
+        console.error("REGISTER ERROR:", error);
+        res.status(500).json({
+            error: "Failed to register user",
+        });
+    }
+});
+
+app.post("/login", async (req,res) => {
+    try
+    {
+        const {username, password} = req.body;
+        if (!username || !password)
+        {
+            return res.status(400).json(
+                {
+                    error: "Username and password required",
+                }
+            );
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+        if (!user)
+        {
+            return res.status(401).json(
+                {
+                    error: "Invalid username or password",
+                }
+            );
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch)
+        {
+            return res.status(401).json(
+                {
+                    error: "Invalid username or password",
+                }
+            );
+        }
+        req.session.userId = user.id;
+        res.status(200).json(
+            {
+                message: "Login successful",
+            }
+        );
+    }
+    catch(error)
+    {
+        res.status(500).json(
+            {
+                error: "Failed to login",
+            }
+        );
+        console.error("LOGIN ERROR:", error);
+    }
+});
+
+app.get("/whoamI", requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.session.userId,
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.error("ME ERROR:", error);
+
+    res.status(500).json({
+      error: "Failed to retrieve user",
+    });
+  }
+});
+
+app.get("/dashboard", requireAuth,async (req, res) => {
+  try {
+    const Recent_Alert_ = await prisma.recent_Alert_.findMany({
+      orderBy: [
+        { severity: "desc" },
+      ],
+    });
+
+    const firstPage = await prisma.recent_Logs.findMany({
+      take: 10,
+      orderBy: [
+        { log_id: "asc" },
+        ],
+    });
+   
+    const lastPage = firstPage[firstPage.length - 1];
+
+    const nextPage = lastPage ? await prisma.recent_Logs.findMany({
+          take: 10,
+          skip: 1,
+          cursor: { log_id: lastPage.log_id },
+          orderBy:{
+              log_id: "asc",
+          }
+    }) : [];
+
+    const Recent_Logs = await prisma.recent_Logs.findMany({
+      orderBy: [
+        { severity: "desc" },
+        { log_time: "desc" },
+      ],
+    });
+    res.status(200).json({ message: "Dashboard data retrieved successfully", Recent_Alert_, Recent_Logs, firstPage, lastPage, nextPage });
+  } catch(error) {
+    res.status(500).json({ error: "Failed to retrieve dashboard data" });
+    console.error("DASHBOARD ERROR:", error);
+  }
+});
+
+app.get("/logs", requireAuth,async (req, res) => {
   try {
     const logs = await prisma.recent_Logs.findMany();
     res.status(200).json({ message: "Logs retrieved successfully", logs });
   } catch(error) {
     res.status(500).json({ error: "Failed to retrieve logs" });
-    console.error(error);
+    console.error("LOGS ERROR:", error);
   }
 });
 
-app.get("/clear", async (req, res) => {
+app.post("/logout", (req,res) => {
+    req.session.destroy((error) =>{
+        if(error){
+            console.error("LOGOUT ERROR:", error);
+            return res.status(500).json({
+                error: "Logout failed",
+            });
+            }
+        res.clearCookie("cloudsafe-session", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+});     res.status(200).json({
+            message: "Logged out successfully",
+        });
+    });
+});
+
+app.delete("/clear", requireAuth, async (req, res) => {
   try {
     const now = new Date();
 
@@ -180,7 +354,7 @@ app.get("/clear", async (req, res) => {
   }
 });
 
-app.get("/assets", async (req, res) => {
+app.get("/assets", requireAuth, async (req, res) => {
   try {
     const freshAssets = await prisma.asset.findMany();
     console.log("Fresh Assets:", freshAssets);
@@ -191,6 +365,29 @@ app.get("/assets", async (req, res) => {
   
 });
 
-app.listen(PORT, () => {
+app.get("/auth/whoamI", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: req.session.userId,
+    },
+    select: {
+      id: true,
+      username: true,
+    },
+  });
+
+  if (!user) {
+    return res.status(401).json({
+      error: "User not found",
+    });
+  }
+
+  res.json({
+    authenticated: true,
+    user,
+  });
+});
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Listening on http://localhost:${PORT}`);
 });

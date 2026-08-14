@@ -1,264 +1,956 @@
-import React, { useState, useEffect } from 'react'; 
-import { 
-  IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, 
-  IonIcon, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonCard, 
-  IonCardHeader, IonCardSubtitle, IonCardContent, IonGrid, IonRow, IonCol, 
-  IonCardTitle, IonBadge, IonText, 
-} from '@ionic/react'; 
-import { bug, cloud, globe, lockClosed, person } from 'ionicons/icons'; 
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer 
-} from 'recharts'; 
-import { useQuery, QueryClientProvider, QueryClient } from '@tanstack/react-query'; 
+import React from "react";
 
-const queryClient = new QueryClient(); 
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonText,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonBadge,
+  IonButton,
+  IonIcon,
+} from "@ionic/react";
 
-const getBadgeColor = (severity: string | null) => { 
-  if (!severity) return 'medium'; 
-  switch (severity.toLowerCase().trim()) { 
-    case 'critical': return 'danger'; 
-    case 'high': return 'warning'; 
-    case 'medium': return 'primary'; 
-    case 'low': return 'success'; 
-    default: return 'medium'; 
-  } 
-}; 
+import {
+  bug,
+  globe,
+  lockClosed,
+  person,
+} from "ionicons/icons";
 
-const API_URL = 'http://localhost:3000'; 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-// --- HARDCODED DATA STRUCTURES --- 
-const MOCK_STATS = [ 
-  { title: "Monitored Assets", value: "8", change: "+1 from yesterday", color: "success" }, 
-  { title: "Active Alerts", value: "3", change: "+2 from yesterday", color: "danger" }, 
-  { title: "Total Logs", value: "4,589", change: "+15% from yesterday", color: "success" }, 
-  { title: "Critical Alerts", value: "1", change: "No change", color: "medium" } 
-]; 
+import {
+  useQuery,
+} from "@tanstack/react-query";
 
-const MOCK_LOGS = [ 
-  { severity: 'Critical', event: 'Brute Force Attack', asset: 'Web Server', time: '10:32 AM', color: 'danger' }, 
-  { severity: 'High', event: 'Port Scan Detected', asset: 'Web Server', time: '10:28 AM', color: 'warning' }, 
-  { severity: 'Medium', event: 'Multiple Failed Logins', asset: 'DB Server', time: '10:17 AM', color: 'primary' } 
-]; 
 
-const MOCK_CHART_LOGS = [ 
-  { time: '12 AM', logs: 400 }, { time: '4 AM', logs: 300 }, { time: '8 AM', logs: 900 }, 
-  { time: '12 PM', logs: 1400 }, { time: '4 PM', logs: 1100 }, { time: '8 PM', logs: 1600 } 
-]; 
+const API_URL = "/api";
 
-const MOCK_CHART_ASSETS = [ 
-  { name: 'Web Server', alerts: 12 }, { name: 'DB Server', alerts: 7 }, 
-  { name: 'VPN Gateway', alerts: 5 }, { name: 'File Server', alerts: 2 } 
-];
 
-// ==========================================
-// FIX 1: Renamed this to DashboardContent. 
-// It safely holds useQuery because it runs UNDER the Provider now.
-// ==========================================
-const DashboardContent = () => { 
-  const { data, isError } = useQuery({ 
-    queryKey: ['securityDashboardData'], 
-    queryFn: () => fetch(`${API_URL}/dashboard`).then(res => { 
-      if (!res.ok) throw new Error('Failed to reach backend database service.'); 
-      return res.json(); 
-    }), 
-    retry: false
-  }); 
+/*
+ * Badge colors
+ */
+const getBadgeColor = (
+  severity: string | null
+) => {
 
-  const alerts = data?.Recent_Alert_ || []; 
-  const logsPaginationView = data?.firstPage || []; 
+  if (!severity) {
+    return "medium";
+  }
 
-  const displayStats = data ? [ 
-    { title: "Monitored Assets", value: "8", change: "Live Network Stream", color: "success" }, 
-    { title: "Active Alerts", value: String(alerts.filter((a: any) => a.status === 'Active').length), change: "Check Status", color: "danger" }, 
-    { title: "Total Logs", value: String(data?.Recent_Logs?.length || 0), change: "Indexed rows", color: "success" }, 
-    { title: "Critical Alerts", value: String(alerts.filter((a: any) => a.severity === 'Critical').length), change: "Urgent items", color: "medium" } 
-  ] : MOCK_STATS; 
+  switch (severity.toLowerCase().trim()) {
 
-  const CHART_LOGS = data && logsPaginationView.length ? logsPaginationView.map((log: any) => ({ 
-    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A', 
-    logs: 350 
-  })) : MOCK_CHART_LOGS; 
+    case "critical":
+      return "danger";
 
-  const assetAlertMap: { [key: string]: number } = {}; 
-  alerts.forEach((alert: any) => { 
-    if (alert.asset) assetAlertMap[alert.asset] = (assetAlertMap[alert.asset] || 0) + 1; 
-  }); 
-  
-  const CHART_ASSETS = data && Object.keys(assetAlertMap).length ? Object.keys(assetAlertMap).map(name => ({ 
-    name: name, 
-    alerts: assetAlertMap[name] 
-  })) : MOCK_CHART_ASSETS; 
+    case "high":
+      return "warning";
 
-  const LIVE_LOGS = data && logsPaginationView.length ? logsPaginationView.map((log: any) => ({ 
-    severity: log.severity || 'Info', 
-    event: log.event || 'System Event', 
-    asset: log.asset || 'N/A', 
-    time: log.log_time ? new Date(log.log_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A', 
-    color: getBadgeColor(log.severity) 
-  })) : MOCK_LOGS; 
+    case "medium":
+      return "primary";
 
-  return ( 
-    <IonPage> 
-      <IonHeader> 
-        <IonToolbar style={{ backgroundColor: '#f8f9fa' }}> 
-          <IonButtons slot="start"> 
-            <IonMenuButton /> 
-          </IonButtons> 
-          <IonTitle color="primary" style={{ fontSize: '3rem' }}>
-            <b> <strong> Cloud Safe &nbsp; <IonIcon slot="end" icon={cloud}></IonIcon> </strong> </b> 
-          </IonTitle> 
-        </IonToolbar> 
-      </IonHeader> 
-      <IonContent className="ion-padding"> 
-          <IonRow> 
-            <h1 style={{ color: '#4370e0', fontWeight: 'bold', margin: '30 30 20px 0' }} > &nbsp; Overview of your Security Environment </h1> 
-          </IonRow>    
-        {isError && (
-          <div style={{ background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
-            <strong>Local Sandbox Mode Active:</strong> Backend API server unreachable. Displaying fallback mock records.
-          </div>
-        )}
+    case "low":
+      return "success";
 
-        <IonGrid> 
-          <IonRow> 
-            {displayStats.map((stat, index) => ( 
-              <IonCol size="12" sizeSm="6" sizeMd="3" key={index}> 
-                <IonCard> 
-                  <IonCardHeader> 
-                    <IonCardSubtitle>{stat.title}</IonCardSubtitle> 
-                    <IonCardTitle> {stat.value} </IonCardTitle> 
-                  </IonCardHeader> 
-                  <IonCardContent> 
-                    <IonText color={stat.color}> {stat.change} </IonText> 
-                  </IonCardContent> 
-                </IonCard> 
-              </IonCol> 
-            ))} 
-          </IonRow> 
-          <IonRow> 
-            <IonCol size="12" size-md="6"> 
-              <IonCard style={{ margin: '0', height: '100%' }}> 
-                <IonCardHeader> 
-                  <IonCardTitle>Logs Over Time</IonCardTitle> 
-                </IonCardHeader> 
-                <IonCardContent> 
-                  <ResponsiveContainer width="100%" height={300}> 
-                    <AreaChart data={CHART_LOGS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
-                      <CartesianGrid strokeDasharray="3 3" /> 
-                      <XAxis dataKey="time" /> 
-                      <YAxis /> 
-                      <RechartsTooltip /> 
-                      <Area type="monotone" dataKey="logs" stroke="#8884d8" fill="#8884d8" /> 
-                    </AreaChart> 
-                  </ResponsiveContainer> 
-                </IonCardContent> 
-              </IonCard> 
-            </IonCol> 
-            <IonCol size="12" size-md="6"> 
-              <IonCard style={{ margin: '0', height: '100%' }}> 
-                <IonCardHeader> 
-                  <IonCardTitle style={{ fontSize: '1.2rem' }}>Top Assets By Alert</IonCardTitle> 
-                </IonCardHeader> 
-                <IonCardContent> 
-                  <ResponsiveContainer width="100%" height={300}> 
-                    <AreaChart data={CHART_ASSETS} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}> 
-                      <CartesianGrid strokeDasharray="3 3" /> 
-                      <XAxis dataKey="name" /> 
-                      <YAxis /> 
-                      <RechartsTooltip /> 
-                      <Area type="monotone" dataKey="alerts" stroke="#82ca9d" fill="#82ca9d" /> 
-                    </AreaChart> 
-                  </ResponsiveContainer> 
-                </IonCardContent> 
-              </IonCard> 
-            </IonCol> 
-          </IonRow> 
+    default:
+      return "medium";
+  }
+};
 
-          <IonRow> 
-            <IonCol size="12" size-md="6"> 
-              <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all Assets </IonButton> 
-              <IonButton shape='round' color='primary' routerLink={'/Assets'}> View all logs </IonButton> 
-              <IonCard style={{ maxWidth: '350px' }}> 
-                <IonList lines="full"> 
-                  {LIVE_LOGS.map((log, index) => ( 
-                    <IonItem key={index} color={log.color}> 
-                      <IonBadge color={log.color} slot="start">{log.severity}</IonBadge> 
-                      <IonLabel> <h2>{log.event}</h2> <p>Asset: {log.asset}</p> <p>Time: {log.time}</p> </IonLabel> 
-                    </IonItem> 
-                  ))} 
-                </IonList> 
-              </IonCard> 
-            </IonCol>
-          </IonRow> 
-          
-          <IonRow>
-            <h1 style={{ color: '#4370e0', fontWeight: 'bold', margin: '30 30 20px 0' }} >
-              &nbsp; Attack Simulator &nbsp;
-            </h1>
-          </IonRow>
-            <IonGrid> 
-              <IonRow> 
-                  <IonCol size="12" sizeSm="6" sizeMd="3" > 
-                   <IonCard> 
-                      <IonCardHeader> 
-                          <IonCardTitle className="ion-display-flex ion-align-items-center" >  
-                            Brute Force  &nbsp;
-                              <IonIcon  icon={lockClosed} ></IonIcon>
-                          </IonCardTitle> 
-                      </IonCardHeader> 
-                      <IonCardSubtitle>
-                      </IonCardSubtitle>
-                  </IonCard> 
-                  </IonCol> 
-                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
-                   <IonCard> 
-                      <IonCardHeader> 
-                          <IonCardTitle> 
-                            Port Scan &nbsp;
-                            <IonIcon  icon={globe} ></IonIcon>
-                          </IonCardTitle> 
-                      </IonCardHeader> 
-                  </IonCard> 
-                  </IonCol> 
-                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
-                   <IonCard> 
-                      <IonCardHeader> 
-                          <IonCardTitle> 
-                            Malware &nbsp;
-                              <IonIcon  icon={bug} ></IonIcon>
-                          </IonCardTitle> 
-                      </IonCardHeader> 
-                  </IonCard> 
-                  </IonCol> 
-                   <IonCol size="12" sizeSm="6" sizeMd="3" > 
-                   <IonCard> 
-                      <IonCardHeader> 
-                          <IonCardTitle> 
-                            Unauthorized Acccess &nbsp;
-                              <IonIcon  icon={person} ></IonIcon>
-                          </IonCardTitle> 
-                      </IonCardHeader> 
-                  </IonCard> 
-                  </IonCol> 
-                </IonRow> 
-            </IonGrid>
 
-        </IonGrid> 
-      </IonContent> 
-    </IonPage> 
-  ); 
-}; 
 
-// ==========================================
-// FIX 2: This is what App Router links to.
-// It wraps the provider on the outside BEFORE the hooks run!
-// ==========================================
-const DashboardPage = () => {
+const DashboardPage: React.FC = () => {
+
+  console.log(
+    "DASHBOARD PAGE RENDERED"
+  );
+
+
+  /*
+   * Get dashboard information
+   */
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+
+    queryKey: [
+      "securityDashboardData",
+    ],
+
+    queryFn: async () => {
+
+      const response = await fetch(
+        `${API_URL}/dashboard`,
+        {
+          credentials: "include",
+        }
+      );
+
+
+      /*
+       * Session expired
+       */
+      if (response.status === 401) {
+
+        localStorage.removeItem(
+          "authenticated"
+        );
+
+        window.location.href =
+          "/login";
+
+        throw new Error(
+          "Session expired"
+        );
+      }
+
+
+      /*
+       * Other backend errors
+       */
+      if (!response.ok) {
+
+        throw new Error(
+          "Failed to retrieve dashboard data"
+        );
+      }
+
+
+      return response.json();
+    },
+
+    retry: false,
+  });
+
+
+
+  /*
+   * Loading
+   */
+  if (isLoading) {
+
+    return (
+      <IonPage>
+
+        <IonHeader>
+
+          <IonToolbar>
+
+            <IonTitle>
+              Cloud Safe
+            </IonTitle>
+
+          </IonToolbar>
+
+        </IonHeader>
+
+
+        <IonContent className="ion-padding">
+
+          <h2>
+            Loading dashboard...
+          </h2>
+
+        </IonContent>
+
+      </IonPage>
+    );
+  }
+
+
+
+  /*
+   * Error
+   */
+  if (isError) {
+
+    return (
+      <IonPage>
+
+        <IonHeader>
+
+          <IonToolbar>
+
+            <IonTitle>
+              Cloud Safe
+            </IonTitle>
+
+          </IonToolbar>
+
+        </IonHeader>
+
+
+        <IonContent className="ion-padding">
+
+          <IonCard color="danger">
+
+            <IonCardHeader>
+
+              <IonCardTitle>
+                Unable to load dashboard
+              </IonCardTitle>
+
+            </IonCardHeader>
+
+
+            <IonCardContent>
+
+              The backend could not be
+              reached or your session
+              has expired.
+
+            </IonCardContent>
+
+          </IonCard>
+
+        </IonContent>
+
+      </IonPage>
+    );
+  }
+
+
+
+  /*
+   * Backend data
+   */
+  const alerts =
+    data?.Recent_Alert_ || [];
+
+  const logs =
+    data?.Recent_Logs || [];
+
+  const firstPage =
+    data?.firstPage || [];
+
+
+
+  /*
+   * Active alerts
+   */
+  const activeAlerts =
+    alerts.filter(
+      (alert: any) =>
+        alert.status === "Active"
+    );
+
+
+
+  /*
+   * Critical alerts
+   */
+  const criticalAlerts =
+    alerts.filter(
+      (alert: any) =>
+        alert.severity
+          ?.toLowerCase() ===
+        "critical"
+    );
+
+
+
+  /*
+   * Logs over time
+   */
+  const chartLogs =
+    firstPage.map((log: any) => ({
+
+      time: log.log_time
+        ? new Date(
+            log.log_time
+          ).toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )
+        : "N/A",
+
+      logs: 1,
+    }));
+
+
+
+  /*
+   * Alerts by asset
+   */
+  const assetAlertMap:
+    Record<string, number> = {};
+
+
+  alerts.forEach(
+    (alert: any) => {
+
+      if (alert.asset) {
+
+        assetAlertMap[
+          alert.asset
+        ] =
+          (
+            assetAlertMap[
+              alert.asset
+            ] || 0
+          ) + 1;
+      }
+
+    }
+  );
+
+
+  const chartAssets =
+    Object.keys(
+      assetAlertMap
+    ).map((name) => ({
+
+      name,
+
+      alerts:
+        assetAlertMap[name],
+
+    }));
+
+
+
+  /*
+   * Recent logs
+   */
+  const liveLogs =
+    firstPage.map((log: any) => ({
+
+      severity:
+        log.severity ||
+        "Info",
+
+      event:
+        log.event ||
+        "System Event",
+
+      asset:
+        log.asset ||
+        "N/A",
+
+      time: log.log_time
+        ? new Date(
+            log.log_time
+          ).toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )
+        : "N/A",
+
+      color:
+        getBadgeColor(
+          log.severity
+        ),
+
+    }));
+
+
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <DashboardContent />
-    </QueryClientProvider>
+
+    <IonPage>
+
+      {/* =========================
+          HEADER
+      ========================== */}
+
+      <IonHeader>
+
+        <IonToolbar>
+
+          <IonTitle color="primary">
+            Cloud Safe
+          </IonTitle>
+
+        </IonToolbar>
+
+      </IonHeader>
+
+
+
+      <IonContent className="ion-padding">
+
+
+        {/* =========================
+            PAGE TITLE
+        ========================== */}
+
+        <h1
+          style={{
+            color: "#4370e0",
+            fontWeight: "bold",
+          }}
+        >
+          Overview of your Security
+          Environment
+        </h1>
+
+
+
+        {/* =========================
+            STATISTICS
+        ========================== */}
+
+        <IonGrid>
+
+          <IonRow>
+
+
+            {/* Assets */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Monitored Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    8
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonText color="success">
+                    Live Network Stream
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Active Alerts */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Active Alerts
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {
+                      activeAlerts.length
+                    }
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonText color="danger">
+                    Check Status
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Total Logs */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Total Logs
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {logs.length}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonText color="success">
+                    Indexed rows
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Critical Alerts */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Critical Alerts
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {
+                      criticalAlerts.length
+                    }
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonText color="danger">
+                    Urgent items
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>
+
+
+
+        {/* =========================
+            CHARTS
+        ========================== */}
+
+        <IonGrid>
+
+          <IonRow>
+
+
+            {/* Logs chart */}
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+                    Logs Over Time
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={300}
+                  >
+
+                    <AreaChart
+                      data={chartLogs}
+                    >
+
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
+
+                      <XAxis
+                        dataKey="time"
+                      />
+
+                      <YAxis />
+
+                      <RechartsTooltip />
+
+                      <Area
+                        type="monotone"
+                        dataKey="logs"
+                        stroke="#8884d8"
+                        fill="#8884d8"
+                      />
+
+                    </AreaChart>
+
+                  </ResponsiveContainer>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Assets chart */}
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+                    Top Assets By Alert
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={300}
+                  >
+
+                    <AreaChart
+                      data={chartAssets}
+                    >
+
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
+
+                      <XAxis
+                        dataKey="name"
+                      />
+
+                      <YAxis />
+
+                      <RechartsTooltip />
+
+                      <Area
+                        type="monotone"
+                        dataKey="alerts"
+                        stroke="#82ca9d"
+                        fill="#82ca9d"
+                      />
+
+                    </AreaChart>
+
+                  </ResponsiveContainer>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>
+
+
+
+        {/* =========================
+            RECENT LOGS
+        ========================== */}
+
+        <IonGrid>
+
+          <IonRow>
+
+            <IonCol size="12">
+
+
+              <IonButton
+                routerLink="/assets"
+              >
+                View all Assets
+              </IonButton>
+
+
+              <IonButton
+                routerLink="/logs"
+              >
+                View all Logs
+              </IonButton>
+
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+                    Recent Logs
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonList>
+
+                  {liveLogs.map(
+                    (
+                      log: any,
+                      index: number
+                    ) => (
+
+                      <IonItem
+                        key={index}
+                      >
+
+                        <IonBadge
+                          color={log.color}
+                          slot="start"
+                        >
+                          {log.severity}
+                        </IonBadge>
+
+
+                        <IonLabel>
+
+                          <h2>
+                            {log.event}
+                          </h2>
+
+                          <p>
+                            Asset:{" "}
+                            {log.asset}
+                          </p>
+
+                          <p>
+                            Time:{" "}
+                            {log.time}
+                          </p>
+
+                        </IonLabel>
+
+                      </IonItem>
+
+                    )
+                  )}
+
+                </IonList>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>
+
+
+
+        {/* =========================
+            ATTACK SIMULATOR
+        ========================== */}
+
+        <h1
+          style={{
+            color: "#4370e0",
+            fontWeight: "bold",
+          }}
+        >
+          Attack Simulator
+        </h1>
+
+
+        <IonGrid>
+
+          <IonRow>
+
+
+            {/* Brute Force */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+
+                    Brute Force{" "}
+
+                    <IonIcon
+                      icon={lockClosed}
+                    />
+
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Port Scan */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+
+                    Port Scan{" "}
+
+                    <IonIcon
+                      icon={globe}
+                    />
+
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Malware */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+
+                    Malware{" "}
+
+                    <IonIcon
+                      icon={bug}
+                    />
+
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+              </IonCard>
+
+            </IonCol>
+
+
+
+            {/* Unauthorized Access */}
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard>
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+
+                    Unauthorized Access{" "}
+
+                    <IonIcon
+                      icon={person}
+                    />
+
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>
+
+
+      </IonContent>
+
+    </IonPage>
   );
 };
+
 
 export default DashboardPage;
