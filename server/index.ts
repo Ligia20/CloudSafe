@@ -169,13 +169,21 @@ app.get("/whoamI", requireAuth, async (req, res) => {
 
 app.get("/dashboard", requireAuth,async (req, res) => {
   try {
+    const userId = req.session.userId;
+
     const Recent_Alert_ = await prisma.recent_Alert_.findMany({
+      where: {
+        userId: userId,
+      },
       orderBy: [
         { severity: "desc" },
       ],
     });
 
     const firstPage = await prisma.recent_Logs.findMany({
+      where: {
+        userId: userId,
+      },
       take: 10,
       orderBy: [
         { log_id: "asc" },
@@ -185,6 +193,9 @@ app.get("/dashboard", requireAuth,async (req, res) => {
     const lastPage = firstPage[firstPage.length - 1];
 
     const nextPage = lastPage ? await prisma.recent_Logs.findMany({
+      where: {
+        userId: userId,
+      },
           take: 10,
           skip: 1,
           cursor: { log_id: lastPage.log_id },
@@ -194,6 +205,9 @@ app.get("/dashboard", requireAuth,async (req, res) => {
     }) : [];
 
     const Recent_Logs = await prisma.recent_Logs.findMany({
+      where: {
+        userId: userId,
+      },
       orderBy: [
         { severity: "desc" },
         { log_time: "desc" },
@@ -208,7 +222,11 @@ app.get("/dashboard", requireAuth,async (req, res) => {
 
 app.get("/logs", requireAuth,async (req, res) => {
   try {
-    const logs = await prisma.recent_Logs.findMany();
+    const logs = await prisma.recent_Logs.findMany({
+      where: {
+        userId: req.session.userId,
+      },
+    });
     res.status(200).json({ message: "Logs retrieved successfully", logs });
   } catch(error) {
     res.status(500).json({ error: "Failed to retrieve logs" });
@@ -234,8 +252,21 @@ app.post("/logout", (req,res) => {
     });
 });
 
+/*
+ * CLEAR OLD RECORDS
+ *
+ * LOW      = older than 1 day
+ * MEDIUM   = older than 2 days
+ * HIGH     = older than 7 days
+ * CRITICAL = older than 30 days
+ *
+ * Only records belonging to the
+ * authenticated user are deleted.
+ */
 app.delete("/clear", requireAuth, async (req, res) => {
   try {
+    const userId = req.session.userId;
+
     const now = new Date();
 
     const oneDayAgo = new Date(
@@ -254,101 +285,95 @@ app.delete("/clear", requireAuth, async (req, res) => {
       now.getTime() - 30 * 24 * 60 * 60 * 1000
     );
 
-    const deleteLowLogs = await prisma.recent_Logs.deleteMany({
+    const deleteLogs = await prisma.recent_Logs.deleteMany({
       where: {
-        severity: "LOW",
-        log_time: {
-          lt: oneDayAgo,
-        },
+        userId: userId,
+        OR: [
+          {
+            severity: "LOW",
+            log_time: {
+              lt: oneDayAgo,
+            },
+          },
+
+          {
+            severity: "MEDIUM",
+            log_time: {
+              lt: twoDaysAgo,
+            },
+          },
+
+          {
+            severity: "HIGH",
+            log_time: {
+              lt: sevenDaysAgo,
+            },
+          },
+
+          {
+            severity: "CRITICAL",
+            log_time: {
+              lt: thirtyDaysAgo,
+            },
+          },
+        ],
       },
     });
 
-    const deleteMediumLogs = await prisma.recent_Logs.deleteMany({
+    const deleteAlerts = await prisma.recent_Alert_.deleteMany({
       where: {
-        severity: "MEDIUM",
-        log_time: {
-          lt: twoDaysAgo,
-        },
-      },
-    });
+        userId: userId,
+        OR: [
+          {
+            severity: "LOW",
+            alert_time: {
+              lt: oneDayAgo,
+            },
+          },
+          
+          {
+            severity: "MEDIUM",
+            alert_time: {
+              lt: twoDaysAgo,
+            },
+          },
 
-    const deleteHighLogs = await prisma.recent_Logs.deleteMany({
-      where: {
-        severity: "HIGH",
-        log_time: {
-          lt: sevenDaysAgo,
-        },
-      },
-    });
+          {
+            severity: "HIGH",
+            alert_time: {
+              lt: sevenDaysAgo,
+            },
+          },
 
-    const deleteCriticalLogs = await prisma.recent_Logs.deleteMany({
-      where: {
-        severity: "CRITICAL",
-        log_time: {
-          lt: thirtyDaysAgo,
-        },
-      },
-    });
-
-    const deleteLowAlerts = await prisma.recent_Alert_.deleteMany({
-      where: {
-        severity: "LOW",
-        alert_time: {
-          lt: oneDayAgo,
-        },
-      },
-    });
-
-    const deleteMediumAlerts = await prisma.recent_Alert_.deleteMany({
-      where: {
-        severity: "MEDIUM",
-        alert_time: {
-          lt: twoDaysAgo,
-        },
-      },
-    });
-
-    const deleteHighAlerts = await prisma.recent_Alert_.deleteMany({
-      where: {
-        severity: "HIGH",
-        alert_time: {
-          lt: sevenDaysAgo,
-        },
-      },
-    });
-
-    const deleteCriticalAlerts = await prisma.recent_Alert_.deleteMany({
-      where: {
-        severity: "CRITICAL",
-        alert_time: {
-          lt: thirtyDaysAgo,
-        },
+          {
+            severity: "CRITICAL",
+            alert_time: {
+              lt: thirtyDaysAgo,
+            },
+          },
+        ],
       },
     });
 
     res.status(200).json({
-      message: "Old records cleared successfully",
 
-      logs: {
-        low: deleteLowLogs.count,
-        medium: deleteMediumLogs.count,
-        high: deleteHighLogs.count,
-        critical: deleteCriticalLogs.count,
-      },
+      message:
+        "Old records cleared successfully",
+        logs:
+        deleteLogs.count,
+      alerts:
+        deleteAlerts.count,
 
-      alerts: {
-        low: deleteLowAlerts.count,
-        medium: deleteMediumAlerts.count,
-        high: deleteHighAlerts.count,
-        critical: deleteCriticalAlerts.count,
-      },
     });
 
-  } catch (error) {
-    console.error("CLEAR ERROR:", error);
+  }
+  catch (error) {
+  console.error("CLEAR ERROR:",error);
+
 
     res.status(500).json({
-      error: "Failed to clear old records",
+      error:
+        "Failed to clear old records",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -356,13 +381,60 @@ app.delete("/clear", requireAuth, async (req, res) => {
 
 app.get("/assets", requireAuth, async (req, res) => {
   try {
-    const freshAssets = await prisma.asset.findMany();
+    const freshAssets = await prisma.asset.findMany({
+      where: {
+        userId: req.session.userId
+      },
+    });
+
     console.log("Fresh Assets:", freshAssets);
-    res.status(200).json({ message: "Assets retrieved successfully", assets: freshAssets });
+    res.status(200).json({
+      message: "Assets retrieved successfully",
+      assets: freshAssets,
+    });
   } catch(error) {
-    res.status(500).json({ error: "Failed to retrieve assets" });
+    res.status(500).json({
+      error: "Failed to retrieve assets"
+    });
   }
   
+});
+app.delete("/account", requireAuth, async (req, res) =>{
+  try{
+    const userId = req.session.userId;
+    await prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    })
+    req.session.destroy((error) =>{
+      if(error){
+        console.error("SESSION  DESTROY ERROR", error);
+        return res.status(500).json({
+          error: "Account deleted, but session cleanup failed",
+        });
+      }
+
+      res.clearCookie(
+        "cloudsafe-session",
+        {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        }
+      );
+
+      return res.status(200).json({
+        message: "Account deleted successfully"
+      });
+    })
+  }
+  catch (error){
+    console.error("DELETE ACCOUNT ERROR:" , error)
+    res.status(500).json({
+      error: "Failed to delete account",
+    })
+  }
 });
 
 app.get("/auth/whoamI", requireAuth, async (req, res) => {

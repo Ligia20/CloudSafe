@@ -42,6 +42,8 @@ import {
 
 import {
   useQuery,
+  useMutation,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 
@@ -85,6 +87,161 @@ const DashboardPage: React.FC = () => {
   console.log(
     "DASHBOARD PAGE RENDERED"
   );
+
+
+  /*
+   * React Query client
+   */
+  const queryClient = useQueryClient();
+
+
+  /*
+   * Clear old records mutation
+   */
+  const clearMutation = useMutation({
+
+    mutationFn: async () => {
+
+      const response = await fetch(
+        `${API_URL}/clear`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+
+      /*
+       * Session expired
+       */
+      if (response.status === 401) {
+
+        localStorage.removeItem(
+          "authenticated"
+        );
+
+        window.location.href =
+          "/login";
+
+        throw new Error(
+          "Session expired"
+        );
+      }
+
+
+      /*
+       * Backend error
+       */
+      if (!response.ok) {
+
+        const errorData =
+          await response
+            .json()
+            .catch(() => null);
+
+        throw new Error(
+          errorData?.error ||
+          "Failed to clear old records"
+        );
+      }
+
+
+      return response.json();
+    },
+
+
+    /*
+     * Refresh dashboard after
+     * successful deletion
+     */
+    onSuccess: () => {
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "securityDashboardData",
+        ],
+      });
+    },
+
+  });
+
+
+
+  /*
+   * Delete user mutation
+   */
+  const deleteUserMutation = useMutation({
+
+    mutationFn: async () => {
+
+      const response = await fetch(
+        `${API_URL}/account`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+
+      /*
+       * Session expired
+       */
+      if (response.status === 401) {
+
+        localStorage.removeItem(
+          "authenticated"
+        );
+
+        window.location.href =
+          "/login";
+
+        throw new Error(
+          "Session expired"
+        );
+      }
+
+
+      /*
+       * Backend error
+       */
+      if (!response.ok) {
+
+        const errorData =
+          await response
+            .json()
+            .catch(() => null);
+
+        throw new Error(
+          errorData?.error ||
+          "Failed to delete account"
+        );
+      }
+
+
+      return response.json();
+    },
+
+
+    /*
+     * Account was deleted.
+     * Remove the local authentication
+     * state and return to login.
+     */
+    onSuccess: () => {
+
+      localStorage.removeItem(
+        "authenticated"
+      );
+
+      queryClient.clear();
+
+      window.location.href =
+        "/login";
+
+    },
+
+  });
+
 
 
   /*
@@ -378,9 +535,7 @@ const DashboardPage: React.FC = () => {
 
     <IonPage>
 
-      {/* =========================
-          HEADER
-      ========================== */}
+      {/* Header */}
 
       <IonHeader>
 
@@ -399,9 +554,7 @@ const DashboardPage: React.FC = () => {
       <IonContent className="ion-padding">
 
 
-        {/* =========================
-            PAGE TITLE
-        ========================== */}
+        {/* Page Title */}
 
         <h1
           style={{
@@ -415,9 +568,7 @@ const DashboardPage: React.FC = () => {
 
 
 
-        {/* =========================
-            STATISTICS
-        ========================== */}
+        {/* Stats*/}
 
         <IonGrid>
 
@@ -580,10 +731,6 @@ const DashboardPage: React.FC = () => {
 
 
 
-        {/* =========================
-            CHARTS
-        ========================== */}
-
         <IonGrid>
 
           <IonRow>
@@ -648,9 +795,6 @@ const DashboardPage: React.FC = () => {
             </IonCol>
 
 
-
-            {/* Assets chart */}
-
             <IonCol
               size="12"
               sizeMd="6"
@@ -712,11 +856,6 @@ const DashboardPage: React.FC = () => {
         </IonGrid>
 
 
-
-        {/* =========================
-            RECENT LOGS
-        ========================== */}
-
         <IonGrid>
 
           <IonRow>
@@ -736,6 +875,118 @@ const DashboardPage: React.FC = () => {
               >
                 View all Logs
               </IonButton>
+
+
+              <IonButton
+                color="danger"
+                disabled={
+                  clearMutation.isPending
+                }
+                onClick={() => {
+
+                  const confirmed =
+                    window.confirm(
+                      "Clear old logs and alerts according to their retention periods?"
+                    );
+
+                  if (confirmed) {
+                    clearMutation.mutate();
+                  }
+
+                }}
+              >
+
+                {clearMutation.isPending
+                  ? "Clearing..."
+                  : "Clear Old Records"}
+
+              </IonButton>
+
+
+              <IonButton
+                color="danger"
+                fill="outline"
+                disabled={
+                  deleteUserMutation.isPending
+                }
+                onClick={() => {
+
+                  const confirmed =
+                    window.confirm(
+                      "WARNING: This will permanently delete your account, logs, alerts, and assets. This action cannot be undone. Continue?"
+                    );
+
+                  if (confirmed) {
+                    deleteUserMutation.mutate();
+                  }
+
+                }}
+              >
+
+                {deleteUserMutation.isPending
+                  ? "Deleting Account..."
+                  : "Delete Account"}
+
+              </IonButton>
+
+
+              {clearMutation.isSuccess && (
+
+                <IonCard color="success">
+
+                  <IonCardContent>
+
+                    Old records cleared
+                    successfully.
+
+                  </IonCardContent>
+
+                </IonCard>
+
+              )}
+
+
+
+              {/* =========================
+                  CLEAR ERROR
+              ========================== */}
+
+              {clearMutation.isError && (
+
+                <IonCard color="danger">
+
+                  <IonCardContent>
+
+                    {clearMutation.error instanceof Error
+                      ? clearMutation.error.message
+                      : "Failed to clear old records."}
+
+                  </IonCardContent>
+
+                </IonCard>
+
+              )}
+
+
+
+              {/* Delete account error */}
+
+              {deleteUserMutation.isError && (
+
+                <IonCard color="danger">
+
+                  <IonCardContent>
+
+                    {deleteUserMutation.error instanceof Error
+                      ? deleteUserMutation.error.message
+                      : "Failed to delete account."}
+
+                  </IonCardContent>
+
+                </IonCard>
+
+              )}
+
 
 
               <IonCard>
@@ -804,9 +1055,7 @@ const DashboardPage: React.FC = () => {
 
 
 
-        {/* =========================
-            ATTACK SIMULATOR
-        ========================== */}
+        {/* Attack simulator */}
 
         <h1
           style={{

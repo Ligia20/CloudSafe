@@ -16,7 +16,11 @@ model Recent_Logs {
   action    String?
   log_time  DateTime? @db.Timestamp(6)
 
-@@map("Recent_Logs")
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("Recent_Logs")
 }
 
 model Recent_Alert_ {
@@ -27,6 +31,10 @@ model Recent_Alert_ {
   alert_time  DateTime? @db.Timestamp(6)
   status      String?
 
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@map("Recent-Alert")
 }
 
@@ -40,16 +48,26 @@ model Asset {
   enrollmentToken String   @unique
   lastSeen        DateTime?
   createdAt       DateTime @default(now())
-} 
+
+  userId          String   @db.Uuid
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
 
 model User {
-  id             String @id @default(uuid()) @db.Uuid
-  username       String @unique
-  password       String
+  id       String  @id @default(uuid()) @db.Uuid
+  username String  @unique
+  password String
+
+  logs     Recent_Logs[]
+  alerts   Recent_Alert_[]
+  assets   Asset[]
 
   @@map("User")
 }
-enum Severity{
+
+enum Severity {
   LOW
   MEDIUM
   HIGH
