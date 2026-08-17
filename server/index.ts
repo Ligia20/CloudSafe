@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 
+import { prisma } from "./lib/prisma.js";
 import eventRoutes from "./routes/events.js";
 import assetRoutes from "./routes/assets.js";
 import dashboardRoutes from "./routes/dashboard.js";
@@ -65,11 +66,9 @@ app.use("/api/v1",agentRoutes);
 */
 
 app.get("/", (req, res) => {
-
     res.status(200).json({
         message: "CloudSafe API is running",
     });
-
 });
 
 app.get("/health", (req, res) => {
@@ -80,10 +79,26 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
+app.get("/health/db", async (req, res) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
 
+        res.status(200).json({
+            status: "healthy",
+            database: "connected",
+        });
+    } catch (error) {
+        console.error("DATABASE HEALTH ERROR:", error);
+
+        res.status(500).json({
+            status: "unhealthy",
+            database: "disconnected",
+        });
+    }
+});
+
+app.listen(PORT, "0.0.0.0", () => {
     console.log(
         `CloudSafe API listening on port ${PORT}`
     );
-
 });
