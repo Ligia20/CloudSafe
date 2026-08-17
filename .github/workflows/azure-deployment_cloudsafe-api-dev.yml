@@ -25,6 +25,8 @@ jobs:
 
       - name: Install dependencies, generate Prisma client, and build backend
         working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
         run: |
           npm install
           npx prisma generate
@@ -58,7 +60,6 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C6407E0177D54DCD83ECFDF0A5830E2B }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cloudsafe-api-dev'
