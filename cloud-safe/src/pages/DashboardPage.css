@@ -21,4 +21,529 @@
   color: #B9D6F2; /* Pale Sky */
   font-weight: bold;
   margin: 30px 30px 20px 0;
+}/* =========================================================
+   CLOUD SAFE DASHBOARD THEME
+   DashboardPage.tsx
+   ========================================================= */
+
+
+/* =========================================================
+   MAIN PAGE CONTENT
+   ========================================================= */
+
+.theme-content {
+  --background: #061a40;
+  --color: #b9d6f2;
+
+  background: #061a40;
+  color: #b9d6f2;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.theme-header {
+  --background: #003559;
+  --color: #b9d6f2;
+
+  background: #003559;
+  color: #b9d6f2;
+}
+
+.theme-header ion-toolbar {
+  --background: #003559;
+  --color: #b9d6f2;
+}
+
+
+/* Menu button */
+
+.theme-menu-btn {
+  --color: #b9d6f2;
+  color: #b9d6f2;
+}
+
+
+/* Cloud Safe title */
+
+.theme-title {
+  --color: #b9d6f2;
+
+  color: #b9d6f2;
+
+  font-size: 2.5rem;
+  font-weight: bold;
+
+  letter-spacing: 0.5px;
+}
+
+
+/* Cloud icon */
+
+.theme-title ion-icon {
+  color: #b9d6f2;
+  font-size: 1.5rem;
+  vertical-align: middle;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+.theme-heading {
+  color: #b9d6f2;
+
+  font-size: 2rem;
+  font-weight: bold;
+
+  margin: 30px 30px 20px 0;
+
+  letter-spacing: 0.3px;
+}
+
+.simulator-heading {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   ERROR / FALLBACK BANNER
+   ========================================================= */
+
+.theme-error-banner {
+  background: rgba(235, 68, 90, 0.15);
+
+  border: 1px solid #eb445a;
+  border-left: 5px solid #eb445a;
+
+  color: #ffb3bd;
+
+  padding: 14px 18px;
+
+  margin: 10px 0 20px 0;
+
+  border-radius: 8px;
+
+  font-size: 0.95rem;
+}
+
+
+/* =========================================================
+   GENERAL CARD STYLE
+   ========================================================= */
+
+.theme-card {
+  --background: #0b2854;
+  --color: #b9d6f2;
+
+  background: #0b2854;
+  color: #b9d6f2;
+
+  border: 1px solid rgba(185, 214, 242, 0.15);
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.25);
+
+  overflow: hidden;
+
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+/* Card hover */
+
+.theme-card:hover {
+  border-color: rgba(67, 112, 224, 0.45);
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Ionic card header */
+
+.theme-card ion-card-header {
+  --background: transparent;
+
+  background: transparent;
+}
+
+
+/* Ionic card content */
+
+.theme-card ion-card-content {
+  --background: transparent;
+
+  background: transparent;
+}
+
+
+/* =========================================================
+   CARD TITLES
+   ========================================================= */
+
+.theme-card ion-card-title {
+  --color: #b9d6f2;
+
+  color: #b9d6f2;
+}
+
+.theme-card-title {
+  color: #b9d6f2;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   CARD SUBTITLE
+   ========================================================= */
+
+.theme-subtitle {
+  --color: #8faed0;
+
+  color: #8faed0;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+.theme-card ion-card-subtitle {
+  color: #8faed0;
+}
+
+
+/* =========================================================
+   CARD LISTS
+   ========================================================= */
+
+.theme-card ion-list {
+  --background: transparent;
+
+  background: transparent;
+}
+
+
+/* List items */
+
+.theme-card ion-item {
+  --background: transparent;
+  --color: #b9d6f2;
+  --border-color: rgba(185, 214, 242, 0.12);
+
+  background: transparent;
+
+  color: #b9d6f2;
+}
+
+
+/* List labels */
+
+.theme-card ion-label {
+  color: #b9d6f2;
+}
+
+
+/* List heading */
+
+.theme-card ion-label h2 {
+  color: #d7e9f8;
+
+  font-weight: 600;
+}
+
+
+/* List secondary text */
+
+.theme-card ion-label p {
+  color: #8faed0;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.theme-card ion-button {
+  --color: #6fa3ff;
+
+  font-weight: 600;
+}
+
+.theme-card ion-button:hover {
+  --color: #9bc0ff;
+}
+
+
+/* =========================================================
+   CHART CARD
+   ========================================================= */
+
+.chart-card {
+  margin: 20px 0;
+}
+
+.chart-card ion-card-content {
+  padding: 10px;
+}
+
+
+/* =========================================================
+   RECHARTS - DARK THEME
+   ========================================================= */
+
+.theme-content .recharts-cartesian-grid line {
+  stroke: rgba(185, 214, 242, 0.12);
+}
+
+.theme-content .recharts-text {
+  fill: #8faed0;
+}
+
+.theme-content .recharts-cartesian-axis-line {
+  stroke: rgba(185, 214, 242, 0.25);
+}
+
+.theme-content .recharts-cartesian-axis-tick-line {
+  stroke: rgba(185, 214, 242, 0.25);
+}
+
+.theme-content .recharts-tooltip-wrapper {
+  outline: none;
+}
+
+
+/* =========================================================
+   CHART TOOLTIP
+   ========================================================= */
+
+.recharts-default-tooltip {
+  background-color: #0b2854 !important;
+
+  border: 1px solid rgba(185, 214, 242, 0.25) !important;
+
+  border-radius: 8px;
+
+  color: #b9d6f2 !important;
+
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+.recharts-tooltip-label {
+  color: #b9d6f2 !important;
+}
+
+
+/* =========================================================
+   ATTACK SIMULATOR
+   ========================================================= */
+
+.simulator-card {
+  min-height: 120px;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+/* Simulator hover */
+
+.simulator-card:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(67, 112, 224, 0.6);
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Simulator title */
+
+.simulator-card ion-card-title {
+  display: flex;
+
+  align-items: center;
+
+  color: #b9d6f2;
+
+  font-size: 1.1rem;
+
+  font-weight: bold;
+}
+
+
+/* Simulator icons */
+
+.simulator-card ion-icon {
+  color: #6fa3ff;
+
+  font-size: 1.3rem;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.theme-card ion-badge {
+  font-weight: 600;
+
+  border-radius: 6px;
+}
+
+
+/* =========================================================
+   IP ADDRESS / CODE
+   ========================================================= */
+
+.theme-card code {
+  color: #9fc4ff;
+
+  background: rgba(142, 166, 227, 0.08) !important;
+
+  border: 1px solid rgba(142, 166, 227, 0.1);
+
+  padding: 2px 6px;
+
+  border-radius: 4px;
+
+  font-family: monospace;
+
+  font-size: 0.85rem;
+}
+
+
+/* =========================================================
+   TABLE / LOG HEADER
+   ========================================================= */
+
+.theme-card ion-item ion-text {
+  color: #8faed0;
+}
+
+
+/* =========================================================
+   GRID TEXT
+   ========================================================= */
+
+.theme-content ion-text {
+  --color: #b9d6f2;
+}
+
+
+/* =========================================================
+   MOBILE RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .theme-title {
+    font-size: 1.5rem;
+  }
+
+  .theme-title ion-icon {
+    font-size: 1.2rem;
+  }
+
+  .theme-heading {
+    font-size: 1.6rem;
+
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+
+  .theme-card {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .theme-card-title {
+    font-size: 1.3rem;
+  }
+
+  .simulator-card {
+    min-height: 100px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .theme-title {
+    font-size: 1.25rem;
+  }
+
+  .theme-heading {
+    font-size: 1.4rem;
+  }
+
+  .theme-card-title {
+    font-size: 1.25rem;
+  }
+
+  .simulator-card ion-card-title {
+    font-size: 1rem;
+  }
+
+  .theme-card ion-label h2 {
+    font-size: 0.95rem;
+  }
+
+  .theme-card ion-label p {
+    font-size: 0.8rem;
+  }
+
+}
+
+
+/* =========================================================
+   OPTIONAL: REMOVE DEFAULT IONIC CARD MARGINS
+   ========================================================= */
+
+.theme-card {
+  --box-shadow: none;
+}
+
+
+/* =========================================================
+   DARK SCROLLBAR
+   ========================================================= */
+
+.theme-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.theme-content::-webkit-scrollbar-track {
+  background: #061a40;
+}
+
+.theme-content::-webkit-scrollbar-thumb {
+  background: #17477a;
+
+  border-radius: 10px;
+}
+
+.theme-content::-webkit-scrollbar-thumb:hover {
+  background: #2865a0;
 }
