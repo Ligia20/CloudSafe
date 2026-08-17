@@ -19,6 +19,44 @@ const getToken=()=>{
   return localStorage.getItem("token");
 };
 
+// --Hardcoded Data Structures --
+const MOCK_STATS = [ 
+  { title: "Monitored Assets", value: "8", change: "+1 from yesterday", color: "success" }, 
+  { title: "Active Alerts", value: "3", change: "+2 from yesterday", color: "danger" }, 
+  { title: "Total Logs", value: "4,589", change: "+15% from yesterday", color: "success" }, 
+  { title: "Critical Alerts", value: "1", change: "No change", color: "medium" } 
+]; 
+
+const MOCK_ALERTS_PANEL = [
+  { severity: 'Critical', name: 'Brute Force Attack', asset: 'Web Server', time: '10:32 AM', status: 'Open', color: 'danger' },
+  { severity: 'High', name: 'Port Scan Detected', asset: 'Web Server', time: '10:28 AM', status: 'Investigating', color: 'warning' },
+  { severity: 'Medium', name: 'Multiple Failed Logins', asset: 'Database Server', time: '10:17 AM', status: 'Open', color: 'primary' }
+];
+
+const MOCK_LOGS_PANEL = [
+  { time: '10:32:15 AM', asset: 'Web Server', ip: '82.15.22.4', event: 'Failed SSH Login', severity: 'High', action: 'Denied', color: 'warning' },
+  { time: '10:31:48 AM', asset: 'Database Server', ip: '192.168.1.55', event: 'SQL Login Success', severity: 'Low', action: 'Allowed', color: 'success' },
+  { time: '10:31:10 AM', asset: 'Firewall', ip: '203.0.113.10', event: 'Blocked Connection', severity: 'Medium', action: 'Denied', color: 'primary' }
+];
+
+const MOCK_LOGS = [ 
+  { severity: 'Critical', event: 'Brute Force Attack', asset: 'Web Server', time: '10:32 AM', color: 'danger' }, 
+  { severity: 'High', event: 'Port Scan Detected', asset: 'Web Server', time: '10:28 AM', color: 'warning' }, 
+  { severity: 'Medium', event: 'Multiple Failed Logins', asset: 'DB Server', time: '10:17 AM', color: 'primary' } 
+]; 
+
+const MOCK_CHART_LOGS = [ 
+  { time: '12 AM', logs: 400 }, { time: '4 AM', logs: 300 }, { time: '8 AM', logs: 900 }, 
+  { time: '12 PM', logs: 1400 }, { time: '4 PM', logs: 1100 }, { time: '8 PM', logs: 1600 } 
+]; 
+
+const MOCK_CHART_ASSETS = [ 
+  { name: 'Web Server', alerts: 12 }, { name: 'DB Server', alerts: 7 }, 
+  { name: 'VPN Gateway', alerts: 5 }, { name: 'File Server', alerts: 2 } 
+];
+
+// --End of Hardcoded data --
+
 const handleUnauthorized=()=>{
   localStorage.removeItem("authenticated");
   localStorage.removeItem("token");
@@ -374,9 +412,9 @@ const DashboardPage:React.FC=()=>{
 
   return(
     <IonPage>
-      <IonHeader>
+      <IonHeader className=".theme-header">
         <IonToolbar>
-          <IonTitle color="primary">
+          <IonTitle className="theme-title" color="primary">
             Cloud Safe
           </IonTitle>
         </IonToolbar>
@@ -393,6 +431,7 @@ const DashboardPage:React.FC=()=>{
             color:"#4370e0",
             fontWeight:"bold"
           }}
+          className="theme-heading"
         >
           Overview of your Security Environment
         </h1>

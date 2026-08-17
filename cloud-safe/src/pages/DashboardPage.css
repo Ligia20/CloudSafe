@@ -1,0 +1,24 @@
+.theme-header {
+  background: #003559;
+  color: #B9D6F2;
+}
+
+.theme-content {
+  background: #061a40;
+  color:#B9D6F2;
+}
+
+.theme-menu-btn {
+  color: #B9D6F2;
+}
+
+.theme-title {
+ font-size: 2.5rem;
+ color: #B9D6F2;
+}
+
+.theme-heading {
+  color: #B9D6F2; /* Pale Sky */
+  font-weight: bold;
+  margin: 30px 30px 20px 0;
+}
