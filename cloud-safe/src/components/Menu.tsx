@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   IonMenu,
   IonHeader,
@@ -11,7 +10,6 @@ import {
   IonLabel,
   IonIcon,
 } from "@ionic/react";
-
 import {
   home,
   list,
@@ -19,56 +17,51 @@ import {
   document,
   logOut,
 } from "ionicons/icons";
-
 import { useHistory } from "react-router-dom";
 
-const Menu: React.FC = () => {
-  const history = useHistory();
+const Menu:React.FC=()=>{
+  const history=useHistory();
 
-  const handleLogout = async () => {
+  const handleNavigation=(path:string)=>{
+    history.push(path);
+  };
+
+  const handleLogout=async()=>{
     console.log("LOGOUT CLICKED");
 
-    try {
-      // Tell backend to destroy the session/cookie
-      const response = await fetch("/api/logout", {
-        method: "POST",
-        credentials: "include",
+    try{
+      const response=await fetch("/api/logout",{
+        method:"POST",
+        credentials:"include",
       });
 
-      console.log(
-        "LOGOUT RESPONSE:",
-        response.status
-      );
+      console.log("LOGOUT RESPONSE:",response.status);
 
-      if (!response.ok) {
+      if(!response.ok){
         console.error(
           "Backend logout failed:",
           response.status
         );
       }
-
-    } catch (error) {
+    }catch(error){
       console.error(
         "LOGOUT ERROR:",
         error
       );
-
-    } finally {
-
-      // Always clear frontend authentication
+    }finally{
       localStorage.removeItem("authenticated");
+      localStorage.removeItem("token");
 
       console.log(
         "AUTH AFTER LOGOUT:",
         localStorage.getItem("authenticated")
       );
 
-      // Return to login
       history.replace("/login");
     }
   };
 
-  return (
+  return(
     <IonMenu contentId="main">
 
       <IonHeader>
@@ -83,11 +76,9 @@ const Menu: React.FC = () => {
 
         <IonList>
 
-          {/* Dashboard */}
-
           <IonItem
             button
-            routerLink="/dashboard"
+            onClick={()=>handleNavigation("/dashboard")}
           >
             <IonIcon
               icon={home}
@@ -99,12 +90,9 @@ const Menu: React.FC = () => {
             </IonLabel>
           </IonItem>
 
-
-          {/* Logs */}
-
           <IonItem
             button
-            routerLink="/logs"
+            onClick={()=>handleNavigation("/logs")}
           >
             <IonIcon
               icon={list}
@@ -116,12 +104,9 @@ const Menu: React.FC = () => {
             </IonLabel>
           </IonItem>
 
-
-          {/* Assets */}
-
           <IonItem
             button
-            routerLink="/assets"
+            onClick={()=>handleNavigation("/assets")}
           >
             <IonIcon
               icon={server}
@@ -133,12 +118,9 @@ const Menu: React.FC = () => {
             </IonLabel>
           </IonItem>
 
-
-          {/* Page */}
-
           <IonItem
             button
-            routerLink="/page"
+            onClick={()=>handleNavigation("/page")}
           >
             <IonIcon
               icon={document}
@@ -149,9 +131,6 @@ const Menu: React.FC = () => {
               Page
             </IonLabel>
           </IonItem>
-
-
-          {/* Logout */}
 
           <IonItem
             button

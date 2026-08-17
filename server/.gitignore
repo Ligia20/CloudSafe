@@ -18,3 +18,5 @@ node_modules
 
 /generated/prisma
 .env
+.env.local
+.env.production

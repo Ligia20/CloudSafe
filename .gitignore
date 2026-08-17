@@ -1,4 +1,9 @@
-.DS_Store
-.DS_Store
+node_modules/
+dist/
+build/
 .env
-/node_modules
+.env.*
+*.log
+coverage/
+.vscode/
+.DS_Store

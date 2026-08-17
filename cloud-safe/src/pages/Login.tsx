@@ -38,7 +38,7 @@ const Login: React.FC = () => {
     try {
 
       const response = await fetch(
-        `${API_URL}/login`,
+        `${API_URL}/v1/login`,
         {
           method: "POST",
 
@@ -88,6 +88,7 @@ const Login: React.FC = () => {
         "authenticated",
         "true"
       );
+      localStorage.setItem("token", data.token);
 
       console.log(
         "LOGIN SUCCESS:",

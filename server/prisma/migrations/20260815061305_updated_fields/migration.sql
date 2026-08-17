@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "id" DROP DEFAULT;
+
+-- AlterTable
+ALTER TABLE "Org" ALTER COLUMN "id" DROP DEFAULT;

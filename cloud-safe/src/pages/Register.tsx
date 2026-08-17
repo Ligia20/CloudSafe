@@ -35,7 +35,7 @@ const Register: React.FC = () => {
     try {
 
       const response = await fetch(
-        `${API_URL}/register`,
+        `${API_URL}/v1/register`,
         {
           method: "POST",
 
