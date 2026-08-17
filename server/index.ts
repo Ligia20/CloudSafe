@@ -15,14 +15,16 @@ import agentRoutes from "./routes/agent.js";
 
 const PORT = Number(process.env.PORT) || 3000;
 const app = express();
+
 app.use(
-    cors({
-        origin: [
-          "https://localhost:5173",
-            "https://moaner-slinging-culinary.ngrok-free.dev",
-        ],
-        credentials: true,
-    })
+  cors({
+    origin: [
+      "https://localhost:5173",
+      "https://moaner-slinging-culinary.ngrok-free.dev",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean) as string[],
+    credentials: true,
+  })
 );
 
 app.use(express.json());
