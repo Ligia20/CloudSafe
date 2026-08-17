@@ -367,6 +367,7 @@ const DashboardContent = () => {
   ); 
 }; 
 
+
 // ==========================================
 // FIX 2: This is what App Router links to.
 // It wraps the provider on the outside BEFORE the hooks run!
