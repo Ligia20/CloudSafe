@@ -44,37 +44,37 @@ const Menu: React.FC = () => {
 
   return (
     <IonMenu contentId="main" type="overlay">
-      <IonHeader>
+      <IonHeader className="theme-header">
         <IonToolbar>
-          <IonTitle>CloudSafe</IonTitle>
+          <IonTitle className="theme-menu-btn">CloudSafe</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent>
-        <IonList lines="none">
-          <IonItem button onClick={() => handleNavigation("/dashboard")}>
-            <IonIcon icon={home} slot="start" />
-            <IonLabel>Dashboard</IonLabel>
+      <IonContent className="theme-header">
+        <IonList lines="none"  className="theme-header">
+          <IonItem  className="theme-header" button onClick={() => handleNavigation("/dashboard")}>
+            <IonIcon className="theme-menu-btn" icon={home} slot="start" />
+            <IonLabel style={{ color: '#b9d6f2' }}> Dashboard</IonLabel>
           </IonItem>
 
-          <IonItem button onClick={() => handleNavigation("/logs")}>
-            <IonIcon icon={list} slot="start" />
-            <IonLabel>Log</IonLabel>
+          <IonItem  className="theme-header" button onClick={() => handleNavigation("/logs")}>
+            <IonIcon className="theme-menu-btn" icon={list} slot="start" />
+            <IonLabel style={{ color: '#b9d6f2' }}>Log</IonLabel>
           </IonItem>
 
-          <IonItem button onClick={() => handleNavigation("/assets")}>
-            <IonIcon icon={server} slot="start" />
-            <IonLabel>Assets</IonLabel>
+          <IonItem  className="theme-header" button onClick={() => handleNavigation("/assets")}>
+            <IonIcon className="theme-menu-btn" icon={server} slot="start" />
+            <IonLabel style={{ color: '#b9d6f2' }}>Assets</IonLabel>
           </IonItem>
 
-          <IonItem button onClick={() => handleNavigation("/Account")}>
-            <IonIcon icon={document} slot="start" />
-            <IonLabel>Account</IonLabel>
+          <IonItem  className="theme-header" button onClick={() => handleNavigation("/Account")}>
+            <IonIcon className="theme-menu-btn" icon={document} slot="start" />
+            <IonLabel style={{ color: '#b9d6f2' }}>Account</IonLabel>
           </IonItem>
 
-          <IonItem button onClick={handleLogout}>
-            <IonIcon icon={logOut} slot="start" />
-            <IonLabel>Logout</IonLabel>
+          <IonItem  className="theme-header" button onClick={handleLogout}>
+            <IonIcon className="theme-menu-btn" icon={logOut} slot="start" />
+            <IonLabel style={{ color: '#b9d6f2' }}>Logout</IonLabel>
           </IonItem>
         </IonList>
       </IonContent>
