@@ -20,7 +20,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import Log from "./pages/log";
 import Assets from "./pages/Assets";
-import Page from "./pages/Page";
+import Account from "./pages/Account";
 
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/normalize.css";
@@ -59,7 +59,7 @@ const App:React.FC=()=>(
             }
 
             return(
-              <IonSplitPane contentId="main">
+              <>
                 <Menu/>
 
                 <IonRouterOutlet id="main">
@@ -84,8 +84,8 @@ const App:React.FC=()=>(
 
                   <ProtectedRoute
                     exact
-                    path="/page"
-                    component={Page}
+                    path="/Account"
+                    component={Account}
                   />
 
                   <Route
@@ -96,8 +96,9 @@ const App:React.FC=()=>(
                     )}
                   />
 
+
                 </IonRouterOutlet>
-              </IonSplitPane>
+              </>
             );
           }}
         />

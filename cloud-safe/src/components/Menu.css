@@ -111,3 +111,23 @@ ion-note {
 ion-item.selected {
   --color: var(--ion-color-primary);
 } 
+
+ion-menu.icon-rail-menu { 
+  --width: 220px; 
+  transition: --width 0.2s ease-in-out; 
+}
+
+ion-menu.icon-rail-menu.collapsed {
+   --width: 60px; 
+}
+
+ion-menu.icon-rail-menu.collapsed ion-item ion-icon {
+   margin-inline-end: 0; 
+   margin-inline-start: 0; 
+}
+
+ion-menu.icon-rail-menu.collapsed ion-item {
+   --padding-start: 0px; 
+   --padding-end: 0px; 
+   justify-content: center; 
+}

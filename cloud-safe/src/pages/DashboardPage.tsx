@@ -20,14 +20,17 @@ import {
   IonBadge,
   IonButton,
   IonIcon,
-  useIonViewWillEnter
+  useIonViewWillEnter,
+  IonMenuButton,
+  IonButtons,
 } from "@ionic/react";
 
 import {
   bug,
   globe,
   lockClosed,
-  person
+  person,
+  cloud
 } from "ionicons/icons";
 
 import {
@@ -54,133 +57,6 @@ const getToken = () => {
   return localStorage.getItem("token");
 };
 
-// =========================================================
-// MOCK DATA
-// =========================================================
-
-const MOCK_STATS = [
-  {
-    title: "Monitored Assets",
-    value: "8",
-    change: "+1 from yesterday",
-    color: "success"
-  },
-  {
-    title: "Active Alerts",
-    value: "3",
-    change: "+2 from yesterday",
-    color: "danger"
-  },
-  {
-    title: "Total Logs",
-    value: "4,589",
-    change: "+15% from yesterday",
-    color: "success"
-  },
-  {
-    title: "Critical Alerts",
-    value: "1",
-    change: "No change",
-    color: "medium"
-  }
-];
-
-const MOCK_ALERTS_PANEL = [
-  {
-    severity: "Critical",
-    name: "Brute Force Attack",
-    asset: "Web Server",
-    time: "10:32 AM",
-    status: "Open",
-    color: "danger"
-  },
-  {
-    severity: "High",
-    name: "Port Scan Detected",
-    asset: "Web Server",
-    time: "10:28 AM",
-    status: "Investigating",
-    color: "warning"
-  },
-  {
-    severity: "Medium",
-    name: "Multiple Failed Logins",
-    asset: "Database Server",
-    time: "10:17 AM",
-    status: "Open",
-    color: "primary"
-  }
-];
-
-const MOCK_LOGS_PANEL = [
-  {
-    time: "10:32:15 AM",
-    asset: "Web Server",
-    ip: "82.15.22.4",
-    event: "Failed SSH Login",
-    severity: "High",
-    action: "Denied",
-    color: "warning"
-  },
-  {
-    time: "10:31:48 AM",
-    asset: "Database Server",
-    ip: "192.168.1.55",
-    event: "SQL Login Success",
-    severity: "Low",
-    action: "Allowed",
-    color: "success"
-  },
-  {
-    time: "10:31:10 AM",
-    asset: "Firewall",
-    ip: "203.0.113.10",
-    event: "Blocked Connection",
-    severity: "Medium",
-    action: "Denied",
-    color: "primary"
-  }
-];
-
-const MOCK_LOGS = [
-  {
-    severity: "Critical",
-    event: "Brute Force Attack",
-    asset: "Web Server",
-    time: "10:32 AM",
-    color: "danger"
-  },
-  {
-    severity: "High",
-    event: "Port Scan Detected",
-    asset: "Web Server",
-    time: "10:28 AM",
-    color: "warning"
-  },
-  {
-    severity: "Medium",
-    event: "Multiple Failed Logins",
-    asset: "DB Server",
-    time: "10:17 AM",
-    color: "primary"
-  }
-];
-
-const MOCK_CHART_LOGS = [
-  { time: "12 AM", logs: 400 },
-  { time: "4 AM", logs: 300 },
-  { time: "8 AM", logs: 900 },
-  { time: "12 PM", logs: 1400 },
-  { time: "4 PM", logs: 1100 },
-  { time: "8 PM", logs: 1600 }
-];
-
-const MOCK_CHART_ASSETS = [
-  { name: "Web Server", alerts: 12 },
-  { name: "DB Server", alerts: 7 },
-  { name: "VPN Gateway", alerts: 5 },
-  { name: "File Server", alerts: 2 }
-];
 
 // =========================================================
 // AUTH
@@ -556,7 +432,8 @@ const DashboardPage: React.FC = () => {
         <IonHeader className="theme-header">
           <IonToolbar>
             <IonTitle className="theme-title">
-              Cloud Safe
+              Cloud Safe 
+               <IonIcon icon={cloud} />
             </IonTitle>
           </IonToolbar>
         </IonHeader>
@@ -685,7 +562,7 @@ const DashboardPage: React.FC = () => {
   // =======================================================
 
   return (
-    <IonPage>
+    <IonPage id="main">
 
       {/* =================================================
           HEADER
@@ -693,9 +570,12 @@ const DashboardPage: React.FC = () => {
 
       <IonHeader className="theme-header">
         <IonToolbar>
-
+          <IonButtons slot="start">
+            <IonMenuButton autoHide={false} />
+          </IonButtons>
           <IonTitle className="theme-title">
-            Cloud Safe
+            Cloud Safe{" "}
+            <IonIcon icon={cloud} />
           </IonTitle>
 
         </IonToolbar>
@@ -1131,6 +1011,7 @@ const DashboardPage: React.FC = () => {
         </IonGrid>
 
 
+
         {/* =================================================
             SIMULATION STATUS
             ================================================= */}
@@ -1364,183 +1245,96 @@ const DashboardPage: React.FC = () => {
             RECENT EVENTS
             ================================================= */}
 
+
         <IonGrid>
           <IonRow>
-
-            <IonCol size="12">
-
+       
+            <IonCol size="12" sizeMd="6">
               <IonCard className="theme-card">
-
                 <IonCardHeader>
-                  <IonCardTitle>
-                    Recent Events
-                  </IonCardTitle>
+                  <IonCardTitle>Recent Events</IonCardTitle>
                 </IonCardHeader>
 
-                <IonList>
+                  <IonList>
+                    {recentEvents.length === 0 && (
+                      <IonItem>
+                        <IonLabel>No recent events.</IonLabel>
+                      </IonItem>
+                    )}
 
-                  {recentEvents.length === 0 && (
-                    <IonItem>
-                      <IonLabel>
-                        No recent events.
-                      </IonLabel>
-                    </IonItem>
-                  )}
-
-
-                  {recentEvents.map(
-                    (
-                      event: any,
-                      index: number
-                    ) => (
-                      <IonItem
-                        key={event.id || index}
-                      >
-
+                    {recentEvents.map((event: any, index: number) => (
+                      <IonItem key={event.id || index}>
                         <IonBadge
-                          color={getBadgeColor(
-                            event.severity
-                          )}
+                          color={getBadgeColor(event.severity)}
                           slot="start"
-                        >
+                          >
                           {event.severity || "INFO"}
                         </IonBadge>
 
                         <IonLabel>
-
                           <h2>
-                            {event.eventType ||
-                              event.event ||
-                              "Security Event"}
+                            {event.eventType || event.event || "Security Event"}
                           </h2>
-
                           <p>
-                            {event.message ||
-                              event.action ||
-                              "Event detected"}
+                            {event.message || event.action || "Event detected"}
                           </p>
-
+                          <p>Source: {event.sourceIp || "N/A"}</p>
                           <p>
-                            Source:{" "}
-                            {event.sourceIp ||
-                              "N/A"}
+                          Time:{" "}
+                          {event.timestamp
+                          ? new Date(event.timestamp).toLocaleString()
+                          : "N/A"}
                           </p>
-
-                          <p>
-                            Time:{" "}
-                            {event.timestamp
-                              ? new Date(
-                                  event.timestamp
-                                ).toLocaleString()
-                              : "N/A"}
-                          </p>
-
                         </IonLabel>
-
                       </IonItem>
-                    )
-                  )}
-
-                </IonList>
-
+                    ))}
+                  </IonList>
               </IonCard>
-
             </IonCol>
 
-          </IonRow>
-        </IonGrid>
-
-
-        {/* =================================================
-            RECENT ALERTS
-            ================================================= */}
-
-        <IonGrid>
-          <IonRow>
-
-            <IonCol size="12">
-
+    {/* ================= RECENT ALERTS ================= */}
+            <IonCol size="12" sizeMd="6">
               <IonCard className="theme-card">
-
                 <IonCardHeader>
-                  <IonCardTitle>
-                    Recent Alerts
-                  </IonCardTitle>
+                  <IonCardTitle>Recent Alerts</IonCardTitle>
                 </IonCardHeader>
 
                 <IonList>
-
                   {recentAlerts.length === 0 && (
                     <IonItem>
-                      <IonLabel>
-                        No recent alerts.
-                      </IonLabel>
+                      <IonLabel>No recent alerts.</IonLabel>
                     </IonItem>
                   )}
 
-
-                  {recentAlerts.map(
-                    (
-                      alert: any,
-                      index: number
-                    ) => (
-                      <IonItem
-                        key={
-                          alert.alert_id ||
-                          index
-                        }
-                      >
-
-                        <IonBadge
-                          color={getBadgeColor(
-                            alert.severity
-                          )}
-                          slot="start"
+                  {recentAlerts.map((alert: any, index: number) => (
+                    <IonItem key={alert.alert_id || index}>
+                      <IonBadge
+                        color={getBadgeColor(alert.severity)}
+                        slot="start"
                         >
-                          {alert.severity || "INFO"}
-                        </IonBadge>
+                        {alert.severity || "INFO"}
+                      </IonBadge>
 
-                        <IonLabel>
-
-                          <h2>
-                            {alert.alert_name_ ||
-                              alert.alert_name ||
-                              "Security Alert"}
-                          </h2>
-
-                          <p>
-                            Asset:{" "}
-                            {alert.asset ||
-                              "N/A"}
-                          </p>
-
-                          <p>
-                            Status:{" "}
-                            {alert.status ||
-                              "N/A"}
-                          </p>
-
+                      <IonLabel>
+                        <h2>
+                          {alert.alert_name_ ||
+                          alert.alert_name ||
+                          "Security Alert"}
+                        </h2>
+                          <p>Asset: {alert.asset || "N/A"}</p>
+                          <p>Status: {alert.status || "N/A"}</p>
                           <p>
                             Time:{" "}
                             {alert.alert_time
-                              ? new Date(
-                                  alert.alert_time
-                                ).toLocaleString()
-                              : "N/A"}
+                            ? new Date(alert.alert_time).toLocaleString()
+                            : "N/A"}
                           </p>
-
-                        </IonLabel>
-
-                      </IonItem>
-                    )
-                  )}
-
+                      </IonLabel>
+                    </IonItem>
+                  ))}
                 </IonList>
-
               </IonCard>
-
             </IonCol>
-
           </IonRow>
         </IonGrid>
 
