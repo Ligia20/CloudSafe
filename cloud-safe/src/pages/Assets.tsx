@@ -21,6 +21,8 @@ import {
   IonSelectOption,
   IonTitle,
   IonToolbar,
+  IonButtons,
+  IonMenuButton
 } from "@ionic/react";
 
 import "./Assets.css";
@@ -157,7 +159,9 @@ const Assets: React.FC = () => {
       <IonHeader>
 
         <IonToolbar>
-
+          <IonButtons slot="start">
+              <IonMenuButton autoHide={false} />
+          </IonButtons> 
           <IonTitle>
             Assets
           </IonTitle>
