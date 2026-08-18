@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - cloudsafe-api-dev
+name: Build and deploy CloudSafe to Azure
 
 on:
   push:
@@ -18,12 +18,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '24.x'
 
-      - name: Install dependencies, generate Prisma client, and build backend
+      - name: Build frontend
+        working-directory: ./cloud-safe
+        run: |
+          npm install
+          npm run build
+
+      - name: Copy frontend into backend
+        run: |
+          rm -rf ./server/public
+          mkdir -p ./server/public
+          cp -R ./cloud-safe/dist/. ./server/public/
+
+      - name: Build backend
         working-directory: ./server
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
@@ -32,7 +44,7 @@ jobs:
           npx prisma generate
           npm run build
 
-      - name: Upload backend artifact
+      - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
@@ -46,7 +58,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: node-app
@@ -59,7 +71,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_843259DF790B4CFD83A417EFE61CC507 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C6407E0177D54DCD83ECFDF0A5830E2B }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy CloudSafe
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cloudsafe-api-dev'
