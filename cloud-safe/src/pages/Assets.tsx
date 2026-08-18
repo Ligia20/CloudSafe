@@ -21,6 +21,8 @@ import {
   IonSelectOption,
   IonTitle,
   IonToolbar,
+  IonButtons,
+  IonMenuButton
 } from "@ionic/react";
 
 import "./Assets.css";
@@ -154,11 +156,13 @@ const Assets: React.FC = () => {
           HEADER
       ========================== */}
 
-      <IonHeader>
+      <IonHeader className="assets-head">
 
-        <IonToolbar>
-
-          <IonTitle>
+        <IonToolbar >
+          <IonButtons  slot="start">
+              <IonMenuButton className="assets-page" autoHide={false} />
+          </IonButtons> 
+          <IonTitle className="assets-title">
             Assets
           </IonTitle>
 
@@ -171,7 +175,7 @@ const Assets: React.FC = () => {
           CONTENT
       ========================== */}
 
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding assets-head">
 
         <div className="assets-heading">
 
@@ -233,7 +237,7 @@ const Assets: React.FC = () => {
              ASSET CARDS
           ========================== */
 
-          <IonGrid>
+          <IonGrid >
 
             <IonRow>
 

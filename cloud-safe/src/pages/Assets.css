@@ -4,15 +4,20 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
+  background: #003559;
+  color: #B9D6F2;
 }
 
 .assets-heading h1 {
   margin-bottom: 4px;
+  background: #003559;
 }
 
 .assets-heading p {
   margin-top: 0;
   color: var(--ion-color-medium);
+  background: #003559;
+  color: #B9D6F2;
 }
 
 .assets-empty-state {
@@ -22,10 +27,13 @@
   text-align: center;
   border: 1px solid var(--ion-color-step-200);
   border-radius: 12px;
+  background: #003559;
+  color: #B9D6F2;
 }
 
 .assets-empty-state h2 {
   margin-top: 0;
+  
 }
 
 .assets-empty-state p {
@@ -43,5 +51,24 @@
   .assets-heading {
     align-items: flex-start;
     flex-direction: column;
+    
   }
+  
+}
+
+.assets-title {
+  background: #003559;
+  color: #B9D6F2;
+}
+
+.assets-page {
+  background: #003559;
+}
+
+.assets-head {
+  background: #003559;
+}
+
+.assets-header {
+  background: #003559;
 }
