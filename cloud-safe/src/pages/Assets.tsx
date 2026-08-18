@@ -490,7 +490,7 @@ const Assets: React.FC = () => {
               <IonMenuButton className="assets-page" autoHide={false} />
           </IonButtons> 
           <IonTitle className="assets-title">
-            Assets
+            Cloud Assets
           </IonTitle>
 
         </IonToolbar>

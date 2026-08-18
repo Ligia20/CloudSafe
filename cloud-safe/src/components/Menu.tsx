@@ -59,12 +59,12 @@ const Menu: React.FC = () => {
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/logs")}>
             <IonIcon className="theme-menu-btn" icon={list} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Log</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2' }}>Logs</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/assets")}>
             <IonIcon className="theme-menu-btn" icon={server} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Assets</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2' }}>Cloud Assets</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/Account")}>
