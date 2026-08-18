@@ -48,25 +48,28 @@ model Recent_Alert_ {
 }
 
 model Asset {
-  id              String       @id @default(uuid()) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   name            String
   type            String
   ipAddress       String
-  status          String       @default("Pending")
+  status          String    @default("Pending")
   hostname        String?
-  enrollmentToken String       @unique
+  enrollmentToken String    @unique
   lastSeen        DateTime?
   os              String?
   cpuCount        Int?
   totalMemory     BigInt?
   agentVersion    String?
   lastInventory   DateTime?
-  createdAt       DateTime     @default(now())
-  userId          String       @db.Uuid
-  organizationId  String       @db.Uuid
-  organization    Organization @relation(fields: [organizationId], references: [id])
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events          Event[]
+  createdAt       DateTime  @default(now())
+  userId          String    @db.Uuid
+  organizationId  String    @db.Uuid
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  events        Event[]
+  statusHistory Asset_Status_History[]
 
   @@index([userId])
   @@index([organizationId])
@@ -99,18 +102,18 @@ model Organization {
 }
 
 model Event {
-  id             String       @id @default(uuid()) @db.Uuid
-  assetId        String       @db.Uuid
-  organizationId String       @db.Uuid
+  id             String   @id @default(uuid()) @db.Uuid
+  assetId        String   @db.Uuid
+  organizationId String   @db.Uuid
   sourceIp       String?
   eventType      String
   message        String
   severity       String
   metadata       Json?
-  timestamp      DateTime     @default(now())
+  timestamp      DateTime @default(now())
 
-  asset          Asset        @relation(fields: [assetId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  asset        Asset        @relation(fields: [assetId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
   @@index([timestamp])
@@ -131,6 +134,18 @@ model Alert_History {
   @@index([alertId])
   @@index([userId])
   @@map("Alert-History")
+}
+
+model Asset_Status_History {
+  id        String   @id @default(uuid()) @db.Uuid
+  assetId   String   @db.Uuid
+  oldStatus String
+  newStatus String
+  changedAt DateTime @default(now())
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
 }
 
 enum Severity {

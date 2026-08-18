@@ -56,9 +56,12 @@ router.post("/ingest/event", agentAuth, async (req: Request, res: Response) => {
             where: {
                 id: asset.id,
             },
+
             data: {
                 lastSeen: new Date(),
-                status: "Active",
+
+                status: "Online",
+
                 ...(eventType === "SYSTEM_INVENTORY" && metadata
                     ? {
                         os: metadata.platform,
@@ -70,6 +73,7 @@ router.post("/ingest/event", agentAuth, async (req: Request, res: Response) => {
                     : {}),
             },
         });
+           
 
         return res.status(201).json({
             message: "Event ingested successfully",

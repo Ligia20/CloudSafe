@@ -21,6 +21,7 @@ import DashboardPage from "./pages/DashboardPage";
 import Log from "./pages/log";
 import Assets from "./pages/Assets";
 import Account from "./pages/Account";
+import CloudAssetDetails from "./pages/CloudAssetDetails";
 
 import "@ionic/react/css/core.css";
 import "@ionic/react/css/normalize.css";
@@ -80,6 +81,12 @@ const App:React.FC=()=>(
                     exact
                     path="/assets"
                     component={Assets}
+                  />
+
+                  <ProtectedRoute
+                    exact
+                    path="/assets/:id"
+                    component={CloudAssetDetails}
                   />
 
                   <ProtectedRoute
