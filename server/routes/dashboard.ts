@@ -207,4 +207,33 @@ router.get("/dashboard/recent",authenticate,async(req,res)=>{
   }
 });
 
+router.delete("/clear",authenticate,async(req,res)=>{
+  try{
+    const organizationId=req.user?.organizationId;
+
+    if(!organizationId){
+      return res.status(401).json({error:"Organization required"});
+    }
+
+    const deletedEvents=await prisma.event.deleteMany({
+      where:{organizationId},
+    });
+
+    const deletedAlerts=await prisma.recent_Alert_.deleteMany({
+      where:{organizationId},
+    });
+
+    res.json({
+      message:"Records cleared successfully",
+      deletedEvents:deletedEvents.count,
+      deletedAlerts:deletedAlerts.count,
+    });
+  }catch(error){
+    console.error("CLEAR RECORDS ERROR:",error);
+    res.status(500).json({
+      error:"Failed to clear records",
+    });
+  }
+});
+
 export default router;

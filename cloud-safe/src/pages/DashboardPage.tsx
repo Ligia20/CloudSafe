@@ -121,7 +121,7 @@ const DashboardPage: React.FC = () => {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`${API_URL}/clear`, {
+      const response = await fetch(`${API_URL}/v1/clear`, {
         method: "DELETE",
         headers: authHeaders()
       });
@@ -144,9 +144,18 @@ const DashboardPage: React.FC = () => {
       return response.json();
     },
 
-    onSuccess: () => {
+      onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["securityDashboardData"]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboardEvents"]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboardAlerts"]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboardRecent"]
       });
     }
   });
@@ -288,8 +297,9 @@ const DashboardPage: React.FC = () => {
 
       return response.json();
     },
-
-    retry: false
+      retry: false,
+      refetchInterval: 5000,
+      refetchIntervalInBackground: true
   });
 
   // =======================================================
@@ -326,8 +336,9 @@ const DashboardPage: React.FC = () => {
 
       return response.json();
     },
-
-    retry: false
+    retry: false,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true
   });
 
   // =======================================================
@@ -365,7 +376,9 @@ const DashboardPage: React.FC = () => {
       return response.json();
     },
 
-    retry: false
+    retry: false,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true
   });
 
   // =======================================================
@@ -403,7 +416,9 @@ const DashboardPage: React.FC = () => {
       return response.json();
     },
 
-    retry: false
+    retry: false,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true
   });
 
   // =======================================================
