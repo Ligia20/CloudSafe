@@ -175,107 +175,112 @@ const Log: React.FC = () => {
   // GET LOGS
   // =======================================================
 
-  useEffect(() => {
-    const getLogs = async () => {
-      try {
+    useEffect(()=>{
+
+    let cancelled=false;
+
+    const getLogs=async()=>{
+
+      try{
         setError("");
-        setLoading(true);
 
-        const token = getToken();
+        const token=getToken();
 
-        if (!token) {
+        if(!token){
           handleUnauthorized();
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/v1/dashboard/events`,
+        const response=await fetch(
+          `${API_URL}/v1/dashboard/events?t=${Date.now()}`,
           {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+            method:"GET",
+            headers:{
+              Authorization:`Bearer ${token}`,
+              "Content-Type":"application/json",
+              "Cache-Control":"no-cache",
             },
+            cache:"no-store",
           }
         );
 
-        const data =
+        const data=
           await response
             .json()
-            .catch(() => null);
+            .catch(()=>null);
 
         console.log(
           "LOG RESPONSE:",
           response.status
         );
 
-        console.log(
-          "LOG DATA:",
-          data
-        );
-
-        if (response.status === 401) {
+        if(response.status===401){
           handleUnauthorized();
           return;
         }
 
-        if (!response.ok) {
+        if(!response.ok){
           setError(
-            data?.error ||
-              "Unable to load logs"
+            data?.error||
+            "Unable to load logs"
           );
-
           return;
         }
 
-        const events =
+        const events=
           Array.isArray(data)
-            ? data
-            : [];
+            ?data
+            :[];
 
-        setLogs(
-          events.map((event: any) => ({
-            id: event.id,
-            assetId: event.assetId,
+        if(!cancelled){
 
-            asset:
-              event.asset?.name ||
-              event.assetId ||
-              null,
+          setLogs(
+            events.map((event:any)=>({
+              id:event.id,
+              assetId:event.assetId,
 
-            hostname:
-              event.asset?.hostname ||
-              null,
+              asset:
+                event.asset?.name||
+                event.assetId||
+                null,
 
-            sourceIp:
-              event.sourceIp ||
-              null,
+              hostname:
+                event.asset?.hostname||
+                null,
 
-            eventType:
-              event.eventType ||
-              "Security Event",
+              sourceIp:
+                event.sourceIp||
+                null,
 
-            message:
-              event.message ||
-              "",
+              eventType:
+                event.eventType||
+                "Security Event",
 
-            category:
-              event.category ||
-              null,
+              message:
+                event.message||
+                "",
 
-            severity:
-              event.severity ||
-              "INFO",
+              category:
+                event.category||
+                null,
 
-            action:
-              event.action ||
-              null,
+              severity:
+                event.severity||
+                "INFO",
 
-            timestamp:
-              event.timestamp,
-          }))
-        );
-      } catch (error) {
+              action:
+                event.action||
+                null,
+
+              timestamp:
+                event.timestamp,
+            }))
+          );
+
+        }
+
+      }catch(error){
+
         console.error(
           "GET LOGS ERROR:",
           error
@@ -284,14 +289,38 @@ const Log: React.FC = () => {
         setError(
           "Unable to connect to server"
         );
-      } finally {
-        setLoading(false);
+
+      }finally{
+
+        if(!cancelled){
+          setLoading(false);
+        }
+
       }
     };
 
-    getLogs();
-  }, []);
 
+    getLogs();
+
+
+    const poll=
+      window.setInterval(
+        getLogs,
+        5000
+      );
+
+
+    return()=>{
+
+      cancelled=true;
+
+      window.clearInterval(
+        poll
+      );
+
+    };
+
+  },[]);
   // =======================================================
   // FILTER LOGS
   // =======================================================
