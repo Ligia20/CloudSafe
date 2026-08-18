@@ -21,7 +21,7 @@ export async function detectEvent(eventId: string) {
 
     if (event.eventType === "authentication_failure") {
         const failures = recentEvents.filter(
-            e => e.eventType === "authentication_failure"
+            (e: any) => e.eventType === "authentication_failure"
         );
         if (failures.length >= 5) {
             detection = {
@@ -32,7 +32,10 @@ export async function detectEvent(eventId: string) {
     }
 
     if (event.eventType === "port_scan") {
-        const scans = recentEvents.filter(e => e.eventType === "port_scan");
+       (e: any) => e.eventType === "port_scan"
+       const scans = recentEvents.filter(
+  (e: any) => e.eventType === "port_scan"
+);
         if (scans.length >= 3) {
             detection = {
                 name: "Port Scan Detected",

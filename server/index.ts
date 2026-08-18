@@ -3,6 +3,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import path from "path";
+import { fileURLToPath } from "url";
 import { prisma } from "./lib/prisma.js";
 
 import eventRoutes from "./routes/events.js";
@@ -65,11 +67,6 @@ app.use("/api/v1",agentRoutes);
     HEALTH CHECKS
 */
 
-app.get("/", (req, res) => {
-    res.status(200).json({
-        message: "CloudSafe API is running",
-    });
-});
 
 app.get("/health", (req, res) => {
     res.status(200).json({
@@ -78,7 +75,6 @@ app.get("/health", (req, res) => {
         timestamp: new Date(),
     });
 });
-
 
 app.get("/health/db", async (req, res) => {
     try {
@@ -98,8 +94,24 @@ app.get("/health/db", async (req, res) => {
     }
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendPath = path.join(__dirname, "../public");
+
+app.use(express.static(frontendPath));
+
+app.use((req, res, next) => {
+    if (
+        req.method === "GET" &&
+        !req.path.startsWith("/api") &&
+        !req.path.startsWith("/health")
+    ) {
+        return res.sendFile(path.join(frontendPath, "index.html"));
+    }
+
+    next();
+});
+
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(
-        `CloudSafe API listening on port ${PORT}`
-    );
+    console.log(`CloudSafe API listening on port ${PORT}`);
 });
