@@ -120,7 +120,7 @@ router.get("/assets",authenticate,async(req,res)=>{
                 createdAt:"desc"
             },
         });
-
+            console.log("ASSET RESPONSE TEST:",assets[0]);
         res.json(
             assets.map(asset=>({
                 ...asset,
@@ -172,6 +172,13 @@ router.get("/assets/:id",authenticate,async(req,res)=>{
                         timestamp:"desc",
                     },
                     take:20,
+                },
+
+                statusHistory:{
+                    orderBy:{
+                        changedAt:"desc",
+                    },
+                    take:50,
                 },
                 
             },
