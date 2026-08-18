@@ -1,3 +1,11 @@
+.assets-page {
+  --assets-content-max-width: 1100px;
+}
+
+.assets-page ion-content {
+  --padding-bottom: 40px;
+}
+
 .assets-heading {
   display: flex;
   align-items: center;
@@ -7,11 +15,13 @@
 }
 
 .assets-heading h1 {
+  margin-top: 0;
   margin-bottom: 4px;
 }
 
 .assets-heading p {
   margin-top: 0;
+  margin-bottom: 0;
   color: var(--ion-color-medium);
 }
 
@@ -39,9 +49,37 @@
   margin-top: 24px;
 }
 
+/*
+ * Cloud Asset Details
+ *
+ * Keep Last Seen as a normal block element.
+ * This prevents Ionic/web-component styling from
+ * affecting the value itself.
+ */
+.asset-last-seen {
+  display: inline-block;
+  min-width: 180px;
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * Small visual indicator that the value is being
+ * refreshed by the frontend.
+ */
+.asset-last-seen.updated {
+  font-weight: 500;
+}
+
 @media (max-width: 576px) {
   .assets-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .asset-last-seen {
+    min-width: 0;
+    white-space: normal;
   }
 }

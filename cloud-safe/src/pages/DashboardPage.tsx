@@ -162,6 +162,10 @@ const DashboardPage: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: ["dashboardRecent"]
       });
+
+      queryClient.invalidateQueries({
+        queryKey:["dashboardStatusHistory"]
+      });    
     }
   });
 
@@ -435,6 +439,55 @@ const DashboardPage: React.FC = () => {
   });
 
 
+
+
+// =======================================================
+// ASSET STATUS HISTORY
+// =======================================================
+
+const statusHistoryQuery=useQuery({
+  queryKey:["dashboardStatusHistory"],
+
+  queryFn:async()=>{
+
+    const response=await fetch(
+      `${API_URL}/v1/dashboard/status-history`,
+      {
+        method:"GET",
+        headers:authHeaders()
+      }
+    );
+
+    if(response.status===401){
+      handleUnauthorized();
+
+      throw new Error(
+        "Session expired"
+      );
+    }
+
+    if(!response.ok){
+
+      const errorData=
+        await response.json()
+        .catch(()=>null);
+
+      throw new Error(
+        errorData?.error||
+        "Failed to retrieve asset status history"
+      );
+    }
+
+    return response.json();
+
+  },
+
+  retry:false,
+  refetchInterval:5000,
+  refetchIntervalInBackground:true
+});
+
+
   // =======================================================
   // LOADING
   // =======================================================
@@ -444,6 +497,7 @@ const DashboardPage: React.FC = () => {
     eventsQuery.isLoading ||
     alertsQuery.isLoading ||
     recentQuery.isLoading;
+    statusHistoryQuery.isLoading;
 
 
   // =======================================================
@@ -455,6 +509,7 @@ const DashboardPage: React.FC = () => {
     eventsQuery.isError ||
     alertsQuery.isError ||
     recentQuery.isError;
+    statusHistoryQuery.isLoading;
 
 
   if (isLoading) {
@@ -545,9 +600,21 @@ const DashboardPage: React.FC = () => {
   const recent =
     recentQuery.data || {};
 
+  const statusHistory =
+    statusHistoryQuery.data || [];
+
 
   const totalAssets =
     data.totalAssets ?? 0;
+
+  const activeAssets =
+      data.activeAssets ?? 0;
+
+  const offlineAssets =
+      data.offlineAssets ?? 0;
+
+  const pendingAssets =
+      data.pendingAssets ?? 0;
 
   const totalEvents =
     data.totalEvents ?? 0;
@@ -614,6 +681,21 @@ const DashboardPage: React.FC = () => {
       events: totalEvents
     }
   ];
+
+  const chartAssets=[
+  {
+    name:"Active",
+    assets:activeAssets
+  },
+  {
+    name:"Offline",
+    assets:offlineAssets
+  },
+  {
+    name:"Pending",
+    assets:pendingAssets
+  }
+];
 
 
   const chartRecentEvents =
@@ -861,6 +943,167 @@ const DashboardPage: React.FC = () => {
         </IonGrid>
 
 
+
+
+        {/* =================================================
+        CLOUD ASSET HEALTH
+    ================================================= */}
+
+        <IonGrid>
+
+          <IonRow>
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Active Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {activeAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="success">
+                    Online and reporting
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Offline Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {offlineAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="danger">
+                    No heartbeat detected
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Pending Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {pendingAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="warning">
+                    Awaiting inventory
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Asset Changes
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {statusHistory.length}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="primary">
+                    Recent transitions
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>    
+
+
+
         {/* =================================================
             CHARTS
             ================================================= */}
@@ -940,6 +1183,63 @@ const DashboardPage: React.FC = () => {
                 <IonCardHeader>
 
                   <IonCardTitle>
+                    Asset Status
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={300}
+                  >
+
+                    <AreaChart
+                      data={chartAssets}
+                    >
+
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
+
+                      <XAxis
+                        dataKey="name"
+                      />
+
+                      <YAxis />
+
+                      <RechartsTooltip />
+
+                      <Area
+                        type="monotone"
+                        dataKey="assets"
+                        stroke="#8884d8"
+                        fill="#8884d8"
+                        fillOpacity={0.25}
+                      />
+
+                    </AreaChart>
+
+                  </ResponsiveContainer>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
+              <IonCard className="theme-card chart-card">
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
                     Alerts by Severity
                   </IonCardTitle>
 
@@ -985,6 +1285,108 @@ const DashboardPage: React.FC = () => {
               </IonCard>
 
             </IonCol>
+
+            {/* Asset Status Timeline */}
+
+            <IonCol
+              size="12"
+              sizeMd="4"
+            >
+
+              <IonCard className="theme-card chart-card">
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+                    Asset Status Timeline
+                  </IonCardTitle>
+
+                  <IonCardSubtitle>
+                    Recent online and offline transitions
+                  </IonCardSubtitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonList>
+
+                    {statusHistory.length===0 && (
+
+                      <IonItem>
+
+                        <IonLabel>
+                          No status changes detected.
+                        </IonLabel>
+
+                      </IonItem>
+
+                    )}
+
+
+                    {statusHistory
+                      .slice(0,5)
+                      .map(
+                        (
+                          history:any,
+                          index:number
+                        )=>(
+
+                          <IonItem
+                            key={
+                              history.id||
+                              index
+                            }
+                          >
+
+                            <IonBadge
+                              slot="start"
+                              color={
+                                history.newStatus==="Active"
+                                  ?"success"
+                                  :"danger"
+                              }
+                            >
+                              {history.newStatus}
+                            </IonBadge>
+
+
+                            <IonLabel>
+
+                              <h2>
+                                {history.asset?.name||
+                                "Cloud Asset"}
+                              </h2>
+
+                              <p>
+                                {history.oldStatus}
+                                {" → "}
+                                {history.newStatus}
+                              </p>
+
+                              <p>
+                                {history.changedAt
+                                  ?new Date(
+                                    history.changedAt
+                                  ).toLocaleString()
+                                  :"Unknown"}
+                              </p>
+
+                            </IonLabel>
+
+                          </IonItem>
+
+                        )
+                      )}
+
+                  </IonList>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>  
 
           </IonRow>
 

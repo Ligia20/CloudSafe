@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
 import {
   IonBadge,
   IonButton,
@@ -19,57 +18,162 @@ import {
   IonRow,
   IonSelect,
   IonSelectOption,
+  IonText,
   IonTitle,
   IonToolbar,
   IonButtons,
-  IonMenuButton
+  IonMenuButton,
+  IonSpinner,
 } from "@ionic/react";
 
 import "./Assets.css";
-
-
-type Severity =
-  | "Low"
-  | "Medium"
-  | "High"
-  | "Critical";
+// =========================================================
+// TYPES
+// =========================================================
 
 type AssetStatus =
   | "Online"
   | "Offline";
 
-
 interface Asset {
-  id: number;
+  id: string;
   name: string;
   type: string;
-  ipAddress: string;
-  severity: Severity;
-  status: AssetStatus;
+  ipAddress: string | null;
+  hostname: string | null;
+  status: AssetStatus | string;
+  os: string | null;
+  cpuCount: number | null;
+  totalMemory: number | null;
+  agentVersion: string | null;
+  lastSeen: string | null;
+  lastInventory: string | null;
+  createdAt: string;
 }
-
 
 interface AssetForm {
   name: string;
   type: string;
   ipAddress: string;
-  severity: Severity;
-  status: AssetStatus;
+  hostname: string;
 }
 
+
+// =========================================================
+// CONSTANTS
+// =========================================================
+
+const API_URL = "/api";
 
 const emptyForm: AssetForm = {
   name: "",
   type: "",
   ipAddress: "",
-  severity: "Low",
-  status: "Online",
+  hostname: "",
 };
 
 
+// =========================================================
+// AUTH
+// =========================================================
+
+const getToken = () => {
+  return localStorage.getItem("token");
+};
+
+const handleUnauthorized = () => {
+  localStorage.removeItem("authenticated");
+  localStorage.removeItem("token");
+
+  window.location.href = "/login";
+};
+
+const authHeaders = () => {
+  const token = getToken();
+
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+};
+
+
+// =========================================================
+// STATUS COLOR
+// =========================================================
+
+const getStatusColor = (
+  status: string
+): "success" | "medium" | "warning" => {
+
+  switch (status.toLowerCase()) {
+
+    case "online":
+    case "active":
+      return "success";
+
+    case "offline":
+      return "medium";
+
+    default:
+      return "warning";
+  }
+};
+
+
+// =========================================================
+// FORMAT MEMORY
+// =========================================================
+
+const formatMemory = (
+  memory: number | null
+) => {
+
+  if (
+    memory === null ||
+    memory === undefined
+  ) {
+    return "N/A";
+  }
+
+  const gigabytes =
+    memory / (1024 * 1024 * 1024);
+
+  return `${gigabytes.toFixed(1)} GB`;
+};
+
+
+// =========================================================
+// FORMAT DATE
+// =========================================================
+
+const formatDate = (
+  date: string | null
+) => {
+
+  if (!date) {
+    return "Never";
+  }
+
+  const parsedDate =
+    new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Unknown";
+  }
+
+  return parsedDate.toLocaleString();
+};
+
+
+// =========================================================
+// ASSETS PAGE
+// =========================================================
+
 const Assets: React.FC = () => {
 
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] =
+    useState<Asset[]>([]);
 
   const [isModalOpen, setIsModalOpen] =
     useState(false);
@@ -77,93 +181,322 @@ const Assets: React.FC = () => {
   const [form, setForm] =
     useState<AssetForm>(emptyForm);
 
+  const [loading, setLoading] =
+    useState(true);
 
-  /*
-   * Add asset
-   */
-  const addAsset = () => {
+  const [saving, setSaving] =
+    useState(false);
+
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null);
+
+  const [error, setError] =
+    useState("");
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const [enrollmentToken, setEnrollmentToken] =
+    useState<string | null>(null);
+
+  const [showEnrollmentToken, setShowEnrollmentToken] =
+    useState(false);
+
+
+// =========================================================
+// LOAD ASSETS
+// =========================================================
+
+  const loadAssets = async () => {
+
+    try {
+
+      setLoading(true);
+      setError("");
+
+      const token = getToken();
+
+      if (!token) {
+        handleUnauthorized();
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/v1/assets`,
+        {
+          method: "GET",
+          headers: authHeaders(),
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      const data =
+        await response.json().catch(() => null);
+
+      if (!response.ok) {
+
+        throw new Error(
+          data?.error ||
+          "Failed to retrieve assets"
+        );
+      }
+
+      setAssets(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD ASSETS ERROR:",
+        error
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load assets"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+
+// =========================================================
+// INITIAL LOAD
+// =========================================================
+
+  useEffect(() => {
+    loadAssets();
+  }, []);
+
+
+// =========================================================
+// ADD / ENROLL CLOUD ASSET
+// =========================================================
+
+  const addAsset = async () => {
 
     if (
       !form.name.trim() ||
-      !form.type.trim() ||
-      !form.ipAddress.trim()
+      !form.type.trim()
     ) {
+      setError(
+        "Asset name and asset type are required."
+      );
+
       return;
     }
 
-    const newAsset: Asset = {
-      id: Date.now(),
-      name: form.name,
-      type: form.type,
-      ipAddress: form.ipAddress,
-      severity: form.severity,
-      status: form.status,
-    };
+    try {
 
-    setAssets((currentAssets) => [
-      ...currentAssets,
-      newAsset,
-    ]);
+      setSaving(true);
+      setError("");
+      setSuccessMessage("");
 
-    setForm(emptyForm);
+      const token = getToken();
 
-    setIsModalOpen(false);
-  };
+      if (!token) {
+        handleUnauthorized();
+        return;
+      }
 
+      const response = await fetch(
+        `${API_URL}/v1/assets/enroll`,
+        {
+          method: "POST",
+          headers: authHeaders(),
 
-  /*
-   * Delete asset
-   */
-  const deleteAsset = (assetId: number) => {
+          body: JSON.stringify({
+            name: form.name.trim(),
+            type: form.type.trim(),
+            ipAddress:
+              form.ipAddress.trim() ||
+              null,
+            hostname:
+              form.hostname.trim() ||
+              null,
+          }),
+        }
+      );
 
-    setAssets((currentAssets) =>
-      currentAssets.filter(
-        (asset) => asset.id !== assetId
-      )
-    );
-  };
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
 
+      const data =
+        await response
+          .json()
+          .catch(() => null);
 
-  /*
-   * Severity color
-   */
-  const getSeverityColor = (
-    severity: Severity
-  ): "success" | "warning" | "tertiary" | "danger" => {
+      if (!response.ok) {
 
-    switch (severity) {
+        throw new Error(
+          data?.error ||
+          "Failed to enroll asset"
+        );
+      }
 
-      case "Critical":
-        return "danger";
+      setForm(emptyForm);
+      setIsModalOpen(false);
 
-      case "High":
-        return "warning";
+      if (data?.enrollmentToken) {
+        setEnrollmentToken(
+          data.enrollmentToken
+        );
 
-      case "Medium":
-        return "tertiary";
+        setShowEnrollmentToken(true);
+      }
 
-      case "Low":
-      default:
-        return "success";
+      setSuccessMessage(
+        "Cloud asset enrolled successfully."
+      );
+
+      await loadAssets();
+
+    } catch (error) {
+
+      console.error(
+        "ASSET ENROLLMENT ERROR:",
+        error
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to enroll asset"
+      );
+
+    } finally {
+
+      setSaving(false);
     }
   };
 
+
+// =========================================================
+// DELETE CLOUD ASSET
+// =========================================================
+
+  const deleteAsset = async (
+    assetId: string
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to remove this cloud asset from monitoring?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+
+      setDeletingId(assetId);
+      setError("");
+      setSuccessMessage("");
+
+      const token = getToken();
+
+      if (!token) {
+        handleUnauthorized();
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/v1/assets/${assetId}`,
+        {
+          method: "DELETE",
+          headers: authHeaders(),
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      const data =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (!response.ok) {
+
+        throw new Error(
+          data?.error ||
+          "Failed to delete asset"
+        );
+      }
+
+      setAssets(
+        currentAssets =>
+          currentAssets.filter(
+            asset =>
+              asset.id !== assetId
+          )
+      );
+
+      setSuccessMessage(
+        "Cloud asset removed successfully."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "DELETE ASSET ERROR:",
+        error
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete asset"
+      );
+
+    } finally {
+
+      setDeletingId(null);
+    }
+  };
+
+
+// =========================================================
+// PAGE
+// =========================================================
 
   return (
     <IonPage className="assets-page">
 
-      {/* =========================
+      {/* =================================================
           HEADER
-      ========================== */}
+          ================================================= */}
 
       <IonHeader>
 
         <IonToolbar>
+
           <IonButtons slot="start">
-              <IonMenuButton autoHide={false} />
-          </IonButtons> 
+
+            <IonMenuButton
+              autoHide={false}
+            />
+
+          </IonButtons>
+
           <IonTitle>
-            Assets
+            Cloud Assets
           </IonTitle>
 
         </IonToolbar>
@@ -171,54 +504,188 @@ const Assets: React.FC = () => {
       </IonHeader>
 
 
-      {/* =========================
+      {/* =================================================
           CONTENT
-      ========================== */}
+          ================================================= */}
 
       <IonContent className="ion-padding">
+
+        {/* =================================================
+            PAGE HEADING
+            ================================================= */}
 
         <div className="assets-heading">
 
           <div>
 
             <h1>
-              Monitored Assets
+              Monitored Cloud Assets
             </h1>
 
             <p>
-              Manage the cloud resources
-              monitored by CloudSafe.
+              Monitor cloud resources
+              connected to CloudSafe.
             </p>
 
           </div>
 
 
           <IonButton
-            onClick={() =>
-              setIsModalOpen(true)
-            }
+            onClick={() => {
+              setError("");
+              setSuccessMessage("");
+              setForm(emptyForm);
+              setIsModalOpen(true);
+            }}
           >
-            Add Asset
+            Add Cloud Asset
           </IonButton>
 
         </div>
 
 
-        {/* =========================
-            EMPTY STATE
-        ========================== */}
+        {/* =================================================
+            STATUS MESSAGES
+            ================================================= */}
 
-        {assets.length === 0 ? (
+        {error && (
+
+          <IonText color="danger">
+
+            <p>
+              {error}
+            </p>
+
+          </IonText>
+
+        )}
+
+
+        {successMessage && (
+
+          <IonText color="success">
+
+            <p>
+              {successMessage}
+            </p>
+
+          </IonText>
+
+        )}
+
+
+        {/* =================================================
+            ENROLLMENT TOKEN
+            ================================================= */}
+
+        {showEnrollmentToken &&
+          enrollmentToken && (
+
+          <div className="enrollment-token-card">
+
+            <h2>
+              Cloud Asset Enrollment Token
+            </h2>
+
+            <p>
+              Save this token. It is used by the
+              monitored cloud asset to send events
+              to CloudSafe.
+            </p>
+
+            <IonItem>
+
+              <IonInput
+                value={enrollmentToken}
+                readonly
+                type="text"
+              />
+
+            </IonItem>
+
+            <div className="asset-actions">
+
+              <IonButton
+                onClick={async () => {
+
+                  try {
+
+                    await navigator.clipboard.writeText(
+                      enrollmentToken
+                    );
+
+                    setSuccessMessage(
+                      "Enrollment token copied."
+                    );
+
+                  } catch (error) {
+
+                    console.error(
+                      "COPY TOKEN ERROR:",
+                      error
+                    );
+
+                    setError(
+                      "Unable to copy enrollment token."
+                    );
+                  }
+                }}
+              >
+                Copy Token
+              </IonButton>
+
+              <IonButton
+                fill="outline"
+                onClick={() => {
+                  setShowEnrollmentToken(false);
+                  setEnrollmentToken(null);
+                }}
+              >
+                Dismiss
+              </IonButton>
+
+            </div>
+
+          </div>
+
+        )}
+
+
+        {/* =================================================
+            LOADING
+            ================================================= */}
+
+        {loading && (
+
+          <div className="assets-empty-state">
+
+            <IonSpinner />
+
+            <p>
+              Loading cloud assets...
+            </p>
+
+          </div>
+
+        )}
+
+
+        {/* =================================================
+            EMPTY STATE
+            ================================================= */}
+
+        {!loading &&
+          assets.length === 0 && (
 
           <div className="assets-empty-state">
 
             <h2>
-              No assets found
+              No cloud assets found
             </h2>
 
             <p>
-              Register your first asset
-              to begin monitoring it.
+              Connect your first cloud
+              resource to begin monitoring.
             </p>
 
             <IonButton
@@ -226,16 +693,20 @@ const Assets: React.FC = () => {
                 setIsModalOpen(true)
               }
             >
-              Add Asset
+              Add Cloud Asset
             </IonButton>
 
           </div>
 
-        ) : (
+        )}
 
-          /* =========================
-             ASSET CARDS
-          ========================== */
+
+        {/* =================================================
+            ASSET CARDS
+            ================================================= */}
+
+        {!loading &&
+          assets.length > 0 && (
 
           <IonGrid>
 
@@ -267,30 +738,7 @@ const Assets: React.FC = () => {
 
                     <IonCardContent>
 
-                      <p>
-                        <strong>
-                          IP Address:
-                        </strong>{" "}
-                        {asset.ipAddress}
-                      </p>
-
-
-                      <p>
-
-                        <strong>
-                          Severity:
-                        </strong>{" "}
-
-                        <IonBadge
-                          color={getSeverityColor(
-                            asset.severity
-                          )}
-                        >
-                          {asset.severity}
-                        </IonBadge>
-
-                      </p>
-
+                      {/* STATUS */}
 
                       <p>
 
@@ -299,11 +747,9 @@ const Assets: React.FC = () => {
                         </strong>{" "}
 
                         <IonBadge
-                          color={
-                            asset.status === "Online"
-                              ? "success"
-                              : "medium"
-                          }
+                          color={getStatusColor(
+                            asset.status
+                          )}
                         >
                           {asset.status}
                         </IonBadge>
@@ -311,24 +757,157 @@ const Assets: React.FC = () => {
                       </p>
 
 
-                      <IonButton
-                        size="small"
-                        disabled
-                      >
-                        Edit
-                      </IonButton>
+                      {/* HOSTNAME */}
+
+                      <p>
+
+                        <strong>
+                          Hostname:
+                        </strong>{" "}
+
+                        {asset.hostname ||
+                          "N/A"}
+
+                      </p>
 
 
-                      <IonButton
-                        size="small"
-                        color="danger"
-                        fill="outline"
-                        onClick={() =>
-                          deleteAsset(asset.id)
-                        }
-                      >
-                        Delete
-                      </IonButton>
+                      {/* IP */}
+
+                      <p>
+
+                        <strong>
+                          IP Address:
+                        </strong>{" "}
+
+                        {asset.ipAddress ||
+                          "N/A"}
+
+                      </p>
+
+
+                      {/* OS */}
+
+                      <p>
+
+                        <strong>
+                          Operating System:
+                        </strong>{" "}
+
+                        {asset.os ||
+                          "N/A"}
+
+                      </p>
+
+
+                      {/* CPU */}
+
+                      <p>
+
+                        <strong>
+                          CPU:
+                        </strong>{" "}
+
+                        {asset.cpuCount !== null
+                          ? `${asset.cpuCount} cores`
+                          : "N/A"}
+
+                      </p>
+
+
+                      {/* MEMORY */}
+
+                      <p>
+
+                        <strong>
+                          Memory:
+                        </strong>{" "}
+
+                        {formatMemory(
+                          asset.totalMemory
+                        )}
+
+                      </p>
+
+
+                      {/* AGENT */}
+
+                      <p>
+
+                        <strong>
+                          Agent:
+                        </strong>{" "}
+
+                        {asset.agentVersion ||
+                          "Not installed"}
+
+                      </p>
+
+
+                      {/* LAST SEEN */}
+
+                      <p>
+
+                        <strong>
+                          Last Seen:
+                        </strong>{" "}
+
+                        {formatDate(
+                          asset.lastSeen
+                        )}
+
+                      </p>
+
+
+                      {/* INVENTORY */}
+
+                      <p>
+
+                        <strong>
+                          Last Inventory:
+                        </strong>{" "}
+
+                        {formatDate(
+                          asset.lastInventory
+                        )}
+
+                      </p>
+
+
+                      {/* ACTIONS */}
+
+                      <div className="asset-actions">
+
+                        <IonButton
+                          size="small"
+                          routerLink={`/assets/${asset.id}`}
+                        >
+                          View Details
+                        </IonButton>
+
+
+                        <IonButton
+                          size="small"
+                          color="danger"
+                          fill="outline"
+                          disabled={
+                            deletingId ===
+                            asset.id
+                          }
+                          onClick={() =>
+                            deleteAsset(
+                              asset.id
+                            )
+                          }
+                        >
+
+                          {deletingId ===
+                          asset.id
+                            ? "Removing..."
+                            : "Remove"}
+
+                        </IonButton>
+
+                      </div>
 
                     </IonCardContent>
 
@@ -341,12 +920,13 @@ const Assets: React.FC = () => {
             </IonRow>
 
           </IonGrid>
+
         )}
 
 
-        {/* =========================
-            ADD ASSET MODAL
-        ========================== */}
+        {/* =================================================
+            ADD CLOUD ASSET MODAL
+            ================================================= */}
 
         <IonModal
           isOpen={isModalOpen}
@@ -360,7 +940,7 @@ const Assets: React.FC = () => {
             <IonToolbar>
 
               <IonTitle>
-                Add Asset
+                Add Cloud Asset
               </IonTitle>
 
             </IonToolbar>
@@ -370,8 +950,13 @@ const Assets: React.FC = () => {
 
           <IonContent className="ion-padding">
 
+            <p>
+              Register a cloud resource
+              that CloudSafe will monitor.
+            </p>
 
-            {/* Asset name */}
+
+            {/* ASSET NAME */}
 
             <IonItem>
 
@@ -382,11 +967,14 @@ const Assets: React.FC = () => {
                 value={form.name}
                 onIonInput={(event) => {
 
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    name:
-                      event.detail.value ?? "",
-                  }));
+                  setForm(
+                    currentForm => ({
+                      ...currentForm,
+                      name:
+                        event.detail
+                          .value ?? "",
+                    })
+                  );
 
                 }}
               />
@@ -394,22 +982,77 @@ const Assets: React.FC = () => {
             </IonItem>
 
 
-            {/* Asset type */}
+            {/* ASSET TYPE */}
+
+            <IonItem>
+
+              <IonSelect
+                label="Cloud asset type"
+                labelPlacement="stacked"
+                value={form.type}
+                placeholder="Select asset type"
+                onIonChange={(event) => {
+
+                  setForm(
+                    currentForm => ({
+                      ...currentForm,
+                      type:
+                        event.detail
+                          .value ?? "",
+                    })
+                  );
+
+                }}
+              >
+
+                <IonSelectOption value="AWS EC2">
+                  AWS EC2
+                </IonSelectOption>
+
+                <IonSelectOption value="Azure Virtual Machine">
+                  Azure Virtual Machine
+                </IonSelectOption>
+
+                <IonSelectOption value="Google Compute Engine">
+                  Google Compute Engine
+                </IonSelectOption>
+
+                <IonSelectOption value="Cloud Database">
+                  Cloud Database
+                </IonSelectOption>
+
+                <IonSelectOption value="Cloud Server">
+                  Cloud Server
+                </IonSelectOption>
+
+                <IonSelectOption value="Other">
+                  Other
+                </IonSelectOption>
+
+              </IonSelect>
+
+            </IonItem>
+
+
+            {/* HOSTNAME */}
 
             <IonItem>
 
               <IonInput
-                label="Asset type"
+                label="Hostname"
                 labelPlacement="stacked"
-                placeholder="Azure Virtual Machine"
-                value={form.type}
+                placeholder="prod-web-01"
+                value={form.hostname}
                 onIonInput={(event) => {
 
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    type:
-                      event.detail.value ?? "",
-                  }));
+                  setForm(
+                    currentForm => ({
+                      ...currentForm,
+                      hostname:
+                        event.detail
+                          .value ?? "",
+                    })
+                  );
 
                 }}
               />
@@ -417,7 +1060,7 @@ const Assets: React.FC = () => {
             </IonItem>
 
 
-            {/* IP address */}
+            {/* IP ADDRESS */}
 
             <IonItem>
 
@@ -428,11 +1071,14 @@ const Assets: React.FC = () => {
                 value={form.ipAddress}
                 onIonInput={(event) => {
 
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    ipAddress:
-                      event.detail.value ?? "",
-                  }));
+                  setForm(
+                    currentForm => ({
+                      ...currentForm,
+                      ipAddress:
+                        event.detail
+                          .value ?? "",
+                    })
+                  );
 
                 }}
               />
@@ -440,84 +1086,28 @@ const Assets: React.FC = () => {
             </IonItem>
 
 
-            {/* Severity */}
+            {/* INFORMATION */}
 
-            <IonItem>
+            <IonText>
 
-              <IonSelect
-                label="Severity"
-                labelPlacement="stacked"
-                value={form.severity}
-                onIonChange={(event) => {
+              <p>
+                The asset will initially appear
+                in the dashboard after enrollment.
+                Agent and inventory information
+                will populate when the monitored
+                resource reports to CloudSafe.
+              </p>
 
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    severity:
-                      event.detail.value as Severity,
-                  }));
-
-                }}
-              >
-
-                <IonSelectOption value="Low">
-                  Low
-                </IonSelectOption>
-
-                <IonSelectOption value="Medium">
-                  Medium
-                </IonSelectOption>
-
-                <IonSelectOption value="High">
-                  High
-                </IonSelectOption>
-
-                <IonSelectOption value="Critical">
-                  Critical
-                </IonSelectOption>
-
-              </IonSelect>
-
-            </IonItem>
+            </IonText>
 
 
-            {/* Status */}
-
-            <IonItem>
-
-              <IonSelect
-                label="Status"
-                labelPlacement="stacked"
-                value={form.status}
-                onIonChange={(event) => {
-
-                  setForm((currentForm) => ({
-                    ...currentForm,
-                    status:
-                      event.detail.value as AssetStatus,
-                  }));
-
-                }}
-              >
-
-                <IonSelectOption value="Online">
-                  Online
-                </IonSelectOption>
-
-                <IonSelectOption value="Offline">
-                  Offline
-                </IonSelectOption>
-
-              </IonSelect>
-
-            </IonItem>
-
-
-            {/* Form buttons */}
+            {/* FORM ACTIONS */}
 
             <div className="asset-form-actions">
 
               <IonButton
                 fill="outline"
+                disabled={saving}
                 onClick={() =>
                   setIsModalOpen(false)
                 }
@@ -527,9 +1117,14 @@ const Assets: React.FC = () => {
 
 
               <IonButton
+                disabled={saving}
                 onClick={addAsset}
               >
-                Save Asset
+
+                {saving
+                  ? "Enrolling..."
+                  : "Enroll Asset"}
+
               </IonButton>
 
             </div>
@@ -543,6 +1138,5 @@ const Assets: React.FC = () => {
     </IonPage>
   );
 };
-
 
 export default Assets;
