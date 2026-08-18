@@ -187,35 +187,46 @@ router.post("/logout", (req, res) => {
 
 });
 
+router.delete("/account",authenticate,async(req,res)=>{
+    try{
+        const userId=req.user?.id;
 
-router.delete("/account", authenticate, async(req,res)=>{
+        const assets=await prisma.asset.findMany({
+            where:{userId},
+            select:{id:true},
+        });
 
-    try {
+        const assetIds=assets.map(asset=>asset.id);
 
-        const userId = req.user?.id;
-
-
-        await prisma.user.delete({
+        await prisma.event.deleteMany({
             where:{
-                id:userId,
+                assetId:{
+                    in:assetIds,
+                },
             },
         });
 
+        await prisma.asset.deleteMany({
+            where:{userId},
+        });
+
+        await prisma.alert_History.deleteMany({
+            where:{userId},
+        });
+
+        await prisma.user.delete({
+            where:{id:userId},
+        });
 
         res.json({
             message:"Account deleted successfully",
         });
-
-
-    } catch(error){
-
+    }catch(error){
         console.error("DELETE ACCOUNT ERROR:",error);
-
         res.status(500).json({
             error:"Failed to delete account",
         });
     }
 });
-
 
 export default router;
