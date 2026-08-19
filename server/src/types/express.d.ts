@@ -15,6 +15,11 @@ declare global {
                 hostname:string | null;
                 enrollmentToken:string;
                 lastSeen:Date | null;
+                os:string | null;
+                cpuCount:number | null;
+                totalMemory:bigint | null;
+                agentVersion:string | null;
+                lastInventory:Date | null;
                 createdAt:Date;
                 userId:string;
                 organizationId:string;

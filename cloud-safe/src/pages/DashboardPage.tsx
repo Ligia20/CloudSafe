@@ -52,6 +52,8 @@ import {
 import "./DashboardPage.css";
 
 const API_URL = "/api";
+//AI Disclosure: Used AI to create the function for the recharts as well as the visualization. 
+//Used AI to help with cleaner css and visualization
 
 const getToken = () => {
   return localStorage.getItem("token");
@@ -344,6 +346,55 @@ const DashboardPage: React.FC = () => {
   });
 
 
+
+
+// =======================================================
+// ASSET STATUS HISTORY
+// =======================================================
+
+const statusHistoryQuery=useQuery({
+  queryKey:["dashboardStatusHistory"],
+
+  queryFn:async()=>{
+
+    const response=await fetch(
+      `${API_URL}/v1/dashboard/status-history`,
+      {
+        method:"GET",
+        headers:authHeaders()
+      }
+    );
+
+    if(response.status===401){
+      handleUnauthorized();
+
+      throw new Error(
+        "Session expired"
+      );
+    }
+
+    if(!response.ok){
+
+      const errorData=
+        await response.json()
+        .catch(()=>null);
+
+      throw new Error(
+        errorData?.error||
+        "Failed to retrieve asset status history"
+      );
+    }
+
+    return response.json();
+
+  },
+
+  retry:false,
+  refetchInterval:5000,
+  refetchIntervalInBackground:true
+});
+
+
   // =======================================================
   // LOADING
   // =======================================================
@@ -353,6 +404,7 @@ const DashboardPage: React.FC = () => {
     eventsQuery.isLoading ||
     alertsQuery.isLoading ||
     recentQuery.isLoading;
+    statusHistoryQuery.isLoading;
 
 
   // =======================================================
@@ -364,6 +416,7 @@ const DashboardPage: React.FC = () => {
     eventsQuery.isError ||
     alertsQuery.isError ||
     recentQuery.isError;
+    statusHistoryQuery.isLoading;
 
 
   if (isLoading) {
@@ -454,9 +507,21 @@ const DashboardPage: React.FC = () => {
   const recent =
     recentQuery.data || {};
 
+  const statusHistory =
+    statusHistoryQuery.data || [];
+
 
   const totalAssets =
     data.totalAssets ?? 0;
+
+  const activeAssets =
+      data.activeAssets ?? 0;
+
+  const offlineAssets =
+      data.offlineAssets ?? 0;
+
+  const pendingAssets =
+      data.pendingAssets ?? 0;
 
   const totalEvents =
     data.totalEvents ?? 0;
@@ -524,6 +589,21 @@ const DashboardPage: React.FC = () => {
     }
   ];
 
+  const chartAssets=[
+  {
+    name:"Active",
+    assets:activeAssets
+  },
+  {
+    name:"Offline",
+    assets:offlineAssets
+  },
+  {
+    name:"Pending",
+    assets:pendingAssets
+  }
+];
+
 
   const chartRecentEvents =
     recentEvents.map(
@@ -552,6 +632,35 @@ const DashboardPage: React.FC = () => {
     chartRecentEvents.length > 0
       ? chartRecentEvents
       : chartEvents;
+    
+  
+
+  const cleanChartEvents = React.useMemo(() => {
+    if (!displayEvents || displayEvents.length === 0) return [];
+
+    const mergedMap: { [key: string]: number } = {};
+
+    displayEvents.forEach((item: any) => {
+      // If the data payload maps time under log.timestamp, convert it cleanly, otherwise fallback to item.name
+      let timeKey = item.name;
+      if (item.timestamp) {
+        timeKey = new Date(item.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          hour12: true
+        });
+      }
+
+      // Accumulate matching minute block counts instead of adding new duplicate entries
+      mergedMap[timeKey] = (mergedMap[timeKey] || 0) + (item.events || 1);
+    });
+
+    // Convert the hash map back into an array structure for Recharts
+    // Note: If your array arrives backwards from your database, add .reverse() to the end of map()
+    return Object.keys(mergedMap).map(key => ({
+      name: key,
+      events: mergedMap[key]
+    }));
+  }, [displayEvents]);
 
 
   // =======================================================
@@ -559,7 +668,7 @@ const DashboardPage: React.FC = () => {
   // =======================================================
 
   return (
-    <IonPage id="main">
+    <IonPage  id="main">
 
       {/* =================================================
           HEADER
@@ -770,6 +879,167 @@ const DashboardPage: React.FC = () => {
         </IonGrid>
 
 
+
+
+        {/* =================================================
+        CLOUD ASSET HEALTH
+    ================================================= */}
+
+        <IonGrid>
+
+          <IonRow>
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Active Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {activeAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="success">
+                    Online and reporting
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Offline Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {offlineAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="danger">
+                    No heartbeat detected
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+                button
+                routerLink="/assets"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Pending Assets
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {pendingAssets}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="warning">
+                    Awaiting inventory
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+
+            <IonCol
+              size="12"
+              sizeSm="6"
+              sizeMd="3"
+            >
+
+              <IonCard
+                className="theme-card"
+              >
+
+                <IonCardHeader>
+
+                  <IonCardSubtitle>
+                    Asset Changes
+                  </IonCardSubtitle>
+
+                  <IonCardTitle>
+                    {statusHistory.length}
+                  </IonCardTitle>
+
+                </IonCardHeader>
+
+                <IonCardContent>
+
+                  <IonText color="primary">
+                    Recent transitions
+                  </IonText>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>
+
+          </IonRow>
+
+        </IonGrid>    
+
+
+
         {/* =================================================
             CHARTS
             ================================================= */}
@@ -785,15 +1055,58 @@ const DashboardPage: React.FC = () => {
               sizeMd="6"
             >
 
+              <IonCard className="theme-card chart-card"> 
+                
+                <IonCardHeader> 
+
+                  <IonCardTitle> Events Over Time </IonCardTitle>
+
+                </IonCardHeader> 
+
+                <IonCardContent> 
+
+                  <ResponsiveContainer width="100%" height={300}> 
+
+                    <AreaChart data={cleanChartEvents}> 
+
+                      <CartesianGrid strokeDasharray="3 3" /> 
+
+                      <XAxis dataKey="name" /> 
+                      
+\                      <YAxis allowDecimals={false} domain={[0, 'auto']} /> 
+                      
+                      <RechartsTooltip /> 
+                      
+                      <Area type="monotone" dataKey="events" stroke="#6fa3ff" fill="#6fa3ff" fillOpacity={0.25} /> 
+                    </AreaChart> 
+
+                  </ResponsiveContainer> 
+
+                </IonCardContent> 
+
+              </IonCard>
+
+
+            </IonCol>
+
+
+            {/* Alerts Chart */}
+
+            <IonCol
+              size="12"
+              sizeMd="6"
+            >
+
               <IonCard className="theme-card chart-card">
 
                 <IonCardHeader>
 
                   <IonCardTitle>
-                    Events Over Time
+                    Asset Status
                   </IonCardTitle>
 
                 </IonCardHeader>
+
 
                 <IonCardContent>
 
@@ -803,7 +1116,7 @@ const DashboardPage: React.FC = () => {
                   >
 
                     <AreaChart
-                      data={displayEvents}
+                      data={chartAssets}
                     >
 
                       <CartesianGrid
@@ -820,9 +1133,9 @@ const DashboardPage: React.FC = () => {
 
                       <Area
                         type="monotone"
-                        dataKey="events"
-                        stroke="#6fa3ff"
-                        fill="#6fa3ff"
+                        dataKey="assets"
+                        stroke="#8884d8"
+                        fill="#8884d8"
                         fillOpacity={0.25}
                       />
 
@@ -835,9 +1148,6 @@ const DashboardPage: React.FC = () => {
               </IonCard>
 
             </IonCol>
-
-
-            {/* Alerts Chart */}
 
             <IonCol
               size="12"
@@ -894,6 +1204,108 @@ const DashboardPage: React.FC = () => {
               </IonCard>
 
             </IonCol>
+
+            {/* Asset Status Timeline */}
+
+            <IonCol
+              size="12"
+              sizeMd="4"
+            >
+
+              <IonCard className="theme-card chart-card">
+
+                <IonCardHeader>
+
+                  <IonCardTitle>
+                    Asset Status Timeline
+                  </IonCardTitle>
+
+                  <IonCardSubtitle>
+                    Recent online and offline transitions
+                  </IonCardSubtitle>
+
+                </IonCardHeader>
+
+
+                <IonCardContent>
+
+                  <IonList>
+
+                    {statusHistory.length===0 && (
+
+                      <IonItem>
+
+                        <IonLabel>
+                          No status changes detected.
+                        </IonLabel>
+
+                      </IonItem>
+
+                    )}
+
+
+                    {statusHistory
+                      .slice(0,5)
+                      .map(
+                        (
+                          history:any,
+                          index:number
+                        )=>(
+
+                          <IonItem
+                            key={
+                              history.id||
+                              index
+                            }
+                          >
+
+                            <IonBadge
+                              slot="start"
+                              color={
+                                history.newStatus==="Active"
+                                  ?"success"
+                                  :"danger"
+                              }
+                            >
+                              {history.newStatus}
+                            </IonBadge>
+
+
+                            <IonLabel>
+
+                              <h2>
+                                {history.asset?.name||
+                                "Cloud Asset"}
+                              </h2>
+
+                              <p>
+                                {history.oldStatus}
+                                {" → "}
+                                {history.newStatus}
+                              </p>
+
+                              <p>
+                                {history.changedAt
+                                  ?new Date(
+                                    history.changedAt
+                                  ).toLocaleString()
+                                  :"Unknown"}
+                              </p>
+
+                            </IonLabel>
+
+                          </IonItem>
+
+                        )
+                      )}
+
+                  </IonList>
+
+                </IonCardContent>
+
+              </IonCard>
+
+            </IonCol>  
 
           </IonRow>
 

@@ -15,24 +15,28 @@ import userAuthRoutes from "./routes/userAuth.js";
 import simulationRoutes from "./routes/simulations.js";
 import ingestRoutes from "./routes/ingest.js";
 import agentRoutes from "./routes/agent.js";
+import { updateCloudAssetStatus } from "./src/services/CloudAssetStatus.js";
 
 const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
 app.use(
-  cors({
-    origin: [
-      "https://localhost:5173",
-      "https://moaner-slinging-culinary.ngrok-free.dev",
-      process.env.FRONTEND_URL,
-    ].filter(Boolean) as string[],
-    credentials: true,
-  })
+    cors({
+        origin: [
+            "https://localhost:5173",
+            "https://moaner-slinging-culinary.ngrok-free.dev",
+            process.env.FRONTEND_URL,
+        ].filter(Boolean) as string[],
+        credentials: true,
+    })
 );
 
 app.use(express.json());
+
 app.set("trust proxy", 1);
+
 const isProduction = process.env.NODE_ENV === "production";
+
 app.use(
     session({
         name: "cloudsafe-session",
@@ -59,15 +63,11 @@ app.use("/api/v1", dashboardRoutes);
 app.use("/api/v1", alertRoutes);
 app.use("/api/v1", simulationRoutes);
 app.use("/api/v1", ingestRoutes);
-app.use("/api/v1",agentRoutes);
-
-
-
+app.use("/api/v1", agentRoutes);
 
 /*
     HEALTH CHECKS
 */
-
 
 app.get("/health", (req, res) => {
     res.status(200).json({
@@ -95,6 +95,10 @@ app.get("/health/db", async (req, res) => {
     }
 });
 
+/*
+    FRONTEND
+*/
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendPath = path.join(__dirname, "../public");
@@ -107,12 +111,25 @@ app.use((req, res, next) => {
         !req.path.startsWith("/api") &&
         !req.path.startsWith("/health")
     ) {
-        return res.sendFile(path.join(frontendPath, "index.html"));
+        return res.sendFile(
+            path.join(frontendPath, "index.html")
+        );
     }
 
     next();
 });
 
+/*
+    SERVER
+*/
+
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`CloudSafe API listening on port ${PORT}`);
+    console.log(
+        `CloudSafe API listening on port ${PORT}`
+    );
+
+    setInterval(
+        updateCloudAssetStatus,
+        30000
+    );
 });

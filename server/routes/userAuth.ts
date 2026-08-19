@@ -196,8 +196,7 @@ router.delete("/account",authenticate,async(req,res)=>{
             select:{id:true},
         });
 
-        const assetIds=assets.map(asset=>asset.id);
-
+const assetIds=assets.map((asset: any)=>asset.id);
         await prisma.event.deleteMany({
             where:{
                 assetId:{
