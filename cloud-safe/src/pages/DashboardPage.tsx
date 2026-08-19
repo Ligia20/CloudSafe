@@ -635,32 +635,7 @@ const statusHistoryQuery=useQuery({
     
   
 
-  const cleanChartEvents = React.useMemo(() => {
-    if (!displayEvents || displayEvents.length === 0) return [];
 
-    const mergedMap: { [key: string]: number } = {};
-
-    displayEvents.forEach((item: any) => {
-      // If the data payload maps time under log.timestamp, convert it cleanly, otherwise fallback to item.name
-      let timeKey = item.name;
-      if (item.timestamp) {
-        timeKey = new Date(item.timestamp).toLocaleTimeString([], {
-          hour: '2-digit',
-          hour12: true
-        });
-      }
-
-      // Accumulate matching minute block counts instead of adding new duplicate entries
-      mergedMap[timeKey] = (mergedMap[timeKey] || 0) + (item.events || 1);
-    });
-
-    // Convert the hash map back into an array structure for Recharts
-    // Note: If your array arrives backwards from your database, add .reverse() to the end of map()
-    return Object.keys(mergedMap).map(key => ({
-      name: key,
-      events: mergedMap[key]
-    }));
-  }, [displayEvents]);
 
 
   // =======================================================
@@ -1050,43 +1025,52 @@ const statusHistoryQuery=useQuery({
 
             {/* Events Chart */}
 
-            <IonCol
+             <IonCol
               size="12"
               sizeMd="6"
             >
+              <IonCard className="theme-card chart-card">
 
-              <IonCard className="theme-card chart-card"> 
-                
-                <IonCardHeader> 
+                <IonCardHeader>
+                  <IonCardTitle>
+                    Events Over Time
+                  </IonCardTitle>
+                </IonCardHeader>
 
-                  <IonCardTitle> Events Over Time </IonCardTitle>
+                <IonCardContent>
 
-                </IonCardHeader> 
+                  <ResponsiveContainer
+                    width="100%"
+                    height={300}
+                  >
+                    <AreaChart
+                      data={displayEvents}
+                    >
 
-                <IonCardContent> 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                      />
 
-                  <ResponsiveContainer width="100%" height={300}> 
+                      <XAxis dataKey="name" />
 
-                    <AreaChart data={cleanChartEvents}> 
+                      <YAxis />
 
-                      <CartesianGrid strokeDasharray="3 3" /> 
+                      <RechartsTooltip />
 
-                      <XAxis dataKey="name" /> 
-                      
-\                      <YAxis allowDecimals={false} domain={[0, 'auto']} /> 
-                      
-                      <RechartsTooltip /> 
-                      
-                      <Area type="monotone" dataKey="events" stroke="#6fa3ff" fill="#6fa3ff" fillOpacity={0.25} /> 
-                    </AreaChart> 
+                      <Area
+                        type="monotone"
+                        dataKey="events"
+                        stroke="#6fa3ff"
+                        fill="#6fa3ff"
+                        fillOpacity={0.25}
+                      />
 
-                  </ResponsiveContainer> 
+                    </AreaChart>
+                  </ResponsiveContainer>
 
-                </IonCardContent> 
+                </IonCardContent>
 
               </IonCard>
-
-
             </IonCol>
 
 
