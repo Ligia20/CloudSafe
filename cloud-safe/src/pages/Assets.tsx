@@ -156,13 +156,13 @@ const Assets: React.FC = () => {
           HEADER
       ========================== */}
 
-      <IonHeader>
+      <IonHeader className="assets-head">
 
-        <IonToolbar>
-          <IonButtons slot="start">
-              <IonMenuButton autoHide={false} />
+        <IonToolbar >
+          <IonButtons  slot="start">
+              <IonMenuButton className="assets-page" autoHide={false} />
           </IonButtons> 
-          <IonTitle>
+          <IonTitle className="assets-title">
             Assets
           </IonTitle>
 
@@ -175,7 +175,7 @@ const Assets: React.FC = () => {
           CONTENT
       ========================== */}
 
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding assets-head">
 
         <div className="assets-heading">
 
@@ -237,7 +237,7 @@ const Assets: React.FC = () => {
              ASSET CARDS
           ========================== */
 
-          <IonGrid>
+          <IonGrid >
 
             <IonRow>
 
