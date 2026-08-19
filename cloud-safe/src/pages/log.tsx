@@ -22,6 +22,8 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 
+//Used AI to help with cleaner css and visualization
+
 import "./log.css";
 
 const API_URL = "/api";

@@ -28,6 +28,8 @@ import "./Account.css";
 
 const API_URL = "/api";
 
+//Used AI to help with cleaner css and visualization 
+
 const getToken = () => {
   return localStorage.getItem("token");
 };
@@ -156,13 +158,13 @@ const Account = () => {
       });
 
    return (
-    <IonPage>
+    <IonPage className="account-settings-page">
       <IonHeader>
         <IonToolbar>
             <IonButtons slot="start">
                 <IonMenuButton autoHide={false} />
             </IonButtons>
-          <IonTitle className="theme-heading">Account Settings</IonTitle>
+          <IonTitle >Account Settings</IonTitle>
         </IonToolbar>
       </IonHeader>
 
