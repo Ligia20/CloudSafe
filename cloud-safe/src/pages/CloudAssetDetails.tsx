@@ -18,7 +18,7 @@ import {
   IonMenuButton,
 } from "@ionic/react";
 import {useParams} from "react-router-dom";
-
+//Used AI to help with cleaner css and visualization
 import "./Assets.css";
 
 interface AssetEvent{

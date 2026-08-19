@@ -1,34 +1,76 @@
-.theme-card {
-  --background: #0b2854;
-  --color: #b9d6f2;
-
-  background: #0b2854;
-  color: #b9d6f2;
-
-  border: 1px solid rgba(185, 214, 242, 0.15);
-
-  border-radius: 12px;
-
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.25);
-
-  overflow: hidden;
-
-  transition:
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+.account-settings-page,
+.account-settings-page ion-content {
+  --background: #061a40  ;
+  background: #061a40  ;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif  ;
 }
 
-.theme-content {
-  --background: #061a40;
-  --color: #b9d6f2;
-
-  background: #061a40;
-  color: #b9d6f2;
+.account-settings-page ion-header,
+.account-settings-page ion-toolbar,
+.account-settings-page ion-menu-button {
+  --background: #003559  ;
+  background: #003559  ;
 }
 
-.theme-heading {
-  color: #B9D6F2; /* Pale Sky */
-  font-weight: bold;
-  margin: 30px 30px 20px 0;
+.account-settings-page ion-header,
+.account-settings-page ion-toolbar {
+  --border-style: none  ;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15)  ;
+  border-bottom: none  ;
+}
+
+.account-settings-page .theme-heading,
+.account-settings-page ion-title,
+.account-settings-page ion-card-title {
+  color: #B9D6F2  ;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif  ;
+  letter-spacing: 0.5px;
+}
+
+.account-settings-page .theme-heading {
+  margin: 0  ;
+}
+
+.account-settings-page ion-menu-button {
+  --color: #B9D6F2  ;
+  color: #B9D6F2  ;
+  --border-radius: 8px  ;
+  border-radius: 8px  ;
+  margin: 4px;
+}
+
+.account-settings-page ion-menu-button::part(native) {
+  border-radius: 8px  ;
+}
+
+.account-settings-page ion-grid {
+  padding: 16px;
+}
+
+.account-settings-page .theme-card {
+  --background: #003559  ;
+  background: #003559  ;
+  color: #B9D6F2  ;
+  border: 1px solid rgba(185, 214, 242, 0.08)  ;
+  border-radius: 16px  ;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2)  ;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-settings-page .theme-card ion-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.account-settings-page .theme-card p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif  ;
+  font-weight: 400  ;
+  color: #d1e3f5  ;
+  font-size: 0.95rem;
+  margin-top: 0;
+  margin-bottom: 20px;
 }

@@ -485,12 +485,12 @@ const Assets: React.FC = () => {
 
       <IonHeader className="assets-head">
 
-        <IonToolbar >
+        <IonToolbar className="assets-head" >
           <IonButtons  slot="start">
               <IonMenuButton className="assets-page" autoHide={false} />
           </IonButtons> 
           <IonTitle className="assets-title">
-            Assets
+            Cloud Assets
           </IonTitle>
 
         </IonToolbar>
@@ -713,6 +713,7 @@ const Assets: React.FC = () => {
                   sizeMd="6"
                   sizeLg="4"
                   key={asset.id}
+                  
                 >
 
                   <IonCard>
@@ -730,7 +731,7 @@ const Assets: React.FC = () => {
                     </IonCardHeader>
 
 
-                    <IonCardContent>
+                    <IonCardContent >
 
                       {/* STATUS */}
 

@@ -52,6 +52,8 @@ import {
 import "./DashboardPage.css";
 
 const API_URL = "/api";
+//AI Disclosure: Used AI to create the function for the recharts as well as the visualization. 
+//Used AI to help with cleaner css and visualization
 
 const getToken = () => {
   return localStorage.getItem("token");
@@ -630,6 +632,35 @@ const statusHistoryQuery=useQuery({
     chartRecentEvents.length > 0
       ? chartRecentEvents
       : chartEvents;
+    
+  
+
+  const cleanChartEvents = React.useMemo(() => {
+    if (!displayEvents || displayEvents.length === 0) return [];
+
+    const mergedMap: { [key: string]: number } = {};
+
+    displayEvents.forEach((item: any) => {
+      // If the data payload maps time under log.timestamp, convert it cleanly, otherwise fallback to item.name
+      let timeKey = item.name;
+      if (item.timestamp) {
+        timeKey = new Date(item.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          hour12: true
+        });
+      }
+
+      // Accumulate matching minute block counts instead of adding new duplicate entries
+      mergedMap[timeKey] = (mergedMap[timeKey] || 0) + (item.events || 1);
+    });
+
+    // Convert the hash map back into an array structure for Recharts
+    // Note: If your array arrives backwards from your database, add .reverse() to the end of map()
+    return Object.keys(mergedMap).map(key => ({
+      name: key,
+      events: mergedMap[key]
+    }));
+  }, [displayEvents]);
 
 
   // =======================================================
@@ -637,7 +668,7 @@ const statusHistoryQuery=useQuery({
   // =======================================================
 
   return (
-    <IonPage id="main">
+    <IonPage  id="main">
 
       {/* =================================================
           HEADER
@@ -1024,54 +1055,37 @@ const statusHistoryQuery=useQuery({
               sizeMd="6"
             >
 
-              <IonCard className="theme-card chart-card">
+              <IonCard className="theme-card chart-card"> 
+                
+                <IonCardHeader> 
 
-                <IonCardHeader>
+                  <IonCardTitle> Events Over Time </IonCardTitle>
 
-                  <IonCardTitle>
-                    Events Over Time
-                  </IonCardTitle>
+                </IonCardHeader> 
 
-                </IonCardHeader>
+                <IonCardContent> 
 
-                <IonCardContent>
+                  <ResponsiveContainer width="100%" height={300}> 
 
-                  <ResponsiveContainer
-                    width="100%"
-                    height={300}
-                  >
+                    <AreaChart data={cleanChartEvents}> 
 
-                    <AreaChart
-                      data={displayEvents}
-                    >
+                      <CartesianGrid strokeDasharray="3 3" /> 
 
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                      />
+                      <XAxis dataKey="name" /> 
+                      
+\                      <YAxis allowDecimals={false} domain={[0, 'auto']} /> 
+                      
+                      <RechartsTooltip /> 
+                      
+                      <Area type="monotone" dataKey="events" stroke="#6fa3ff" fill="#6fa3ff" fillOpacity={0.25} /> 
+                    </AreaChart> 
 
-                      <XAxis
-                        dataKey="name"
-                      />
+                  </ResponsiveContainer> 
 
-                      <YAxis />
-
-                      <RechartsTooltip />
-
-                      <Area
-                        type="monotone"
-                        dataKey="events"
-                        stroke="#6fa3ff"
-                        fill="#6fa3ff"
-                        fillOpacity={0.25}
-                      />
-
-                    </AreaChart>
-
-                  </ResponsiveContainer>
-
-                </IonCardContent>
+                </IonCardContent> 
 
               </IonCard>
+
 
             </IonCol>
 

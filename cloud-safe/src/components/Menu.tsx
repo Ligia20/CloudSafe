@@ -46,7 +46,7 @@ const Menu: React.FC = () => {
     <IonMenu contentId="main" type="overlay">
       <IonHeader className="theme-header">
         <IonToolbar>
-          <IonTitle className="theme-menu-btn">CloudSafe</IonTitle>
+          <IonTitle className="theme-menu-btn" style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"  }} >CloudSafe</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -54,27 +54,27 @@ const Menu: React.FC = () => {
         <IonList lines="none"  className="theme-header">
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/dashboard")}>
             <IonIcon className="theme-menu-btn" icon={home} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}> Dashboard</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"  }}> Dashboard</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/logs")}>
             <IonIcon className="theme-menu-btn" icon={list} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Log</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}>Logs</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/assets")}>
             <IonIcon className="theme-menu-btn" icon={server} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Assets</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}>Cloud Assets</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={() => handleNavigation("/Account")}>
             <IonIcon className="theme-menu-btn" icon={document} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Account</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}>Account</IonLabel>
           </IonItem>
 
           <IonItem  className="theme-header" button onClick={handleLogout}>
             <IonIcon className="theme-menu-btn" icon={logOut} slot="start" />
-            <IonLabel style={{ color: '#b9d6f2' }}>Logout</IonLabel>
+            <IonLabel style={{ color: '#b9d6f2', fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif" }}>Logout</IonLabel>
           </IonItem>
         </IonList>
       </IonContent>
