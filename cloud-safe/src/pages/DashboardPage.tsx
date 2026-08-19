@@ -403,7 +403,7 @@ const statusHistoryQuery=useQuery({
     summaryQuery.isLoading ||
     eventsQuery.isLoading ||
     alertsQuery.isLoading ||
-    recentQuery.isLoading;
+    recentQuery.isLoading ||
     statusHistoryQuery.isLoading;
 
 
@@ -415,8 +415,8 @@ const statusHistoryQuery=useQuery({
     summaryQuery.isError ||
     eventsQuery.isError ||
     alertsQuery.isError ||
-    recentQuery.isError;
-    statusHistoryQuery.isLoading;
+    recentQuery.isError ||
+    statusHistoryQuery.isError;
 
 
   if (isLoading) {
@@ -635,32 +635,30 @@ const statusHistoryQuery=useQuery({
     
   
 
-  const cleanChartEvents = React.useMemo(() => {
+  const cleanChartEvents = (() => {
     if (!displayEvents || displayEvents.length === 0) return [];
 
     const mergedMap: { [key: string]: number } = {};
 
     displayEvents.forEach((item: any) => {
-      // If the data payload maps time under log.timestamp, convert it cleanly, otherwise fallback to item.name
-      let timeKey = item.name;
-      if (item.timestamp) {
-        timeKey = new Date(item.timestamp).toLocaleTimeString([], {
-          hour: '2-digit',
-          hour12: true
-        });
-      }
+        let timeKey = item.name;
 
-      // Accumulate matching minute block counts instead of adding new duplicate entries
-      mergedMap[timeKey] = (mergedMap[timeKey] || 0) + (item.events || 1);
+        if (item.timestamp) {
+            timeKey = new Date(item.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                hour12: true
+            });
+        }
+
+        mergedMap[timeKey] =
+            (mergedMap[timeKey] || 0) + (item.events || 1);
     });
 
-    // Convert the hash map back into an array structure for Recharts
-    // Note: If your array arrives backwards from your database, add .reverse() to the end of map()
     return Object.keys(mergedMap).map(key => ({
-      name: key,
-      events: mergedMap[key]
+        name: key,
+        events: mergedMap[key]
     }));
-  }, [displayEvents]);
+})();
 
 
   // =======================================================
@@ -1073,7 +1071,7 @@ const statusHistoryQuery=useQuery({
 
                       <XAxis dataKey="name" /> 
                       
-\                      <YAxis allowDecimals={false} domain={[0, 'auto']} /> 
+                      <YAxis allowDecimals={false} domain={[0, 'auto']} /> 
                       
                       <RechartsTooltip /> 
                       
