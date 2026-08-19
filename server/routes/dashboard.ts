@@ -401,7 +401,8 @@ router.get("/dashboard/status-history",authenticate,async(req,res)=>{
         include:{
           asset:{
             select:{
-              name:true
+              name:true,
+              hostname:true,
             }
           }
         }
